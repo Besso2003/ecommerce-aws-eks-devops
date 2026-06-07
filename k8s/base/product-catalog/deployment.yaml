@@ -2,7 +2,6 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: product-catalog
-  namespace: dev
   labels:
     app: product-catalog
 spec:
@@ -21,9 +20,9 @@ spec:
         imagePullPolicy: Always
         ports:
         - containerPort: 8088
-        env:
-        - name: PRODUCT_CATALOG_PORT
-          value: "8088"
+        envFrom:
+        - configMapRef:
+            name: product-catalog-config
         resources:
           limits:
             memory: "128Mi"

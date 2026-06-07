@@ -2,7 +2,6 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: ad-service
-  namespace: dev
   labels:
     app: ad-service
 spec:
@@ -21,9 +20,9 @@ spec:
           imagePullPolicy: Always
           ports:
             - containerPort: 9099
-          env:
-            - name: AD_PORT
-              value: "9099"
+          envFrom:
+            - configMapRef:
+                name: ad-service-config
           resources:
             requests:
               cpu: 100m
