@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: recommendation-service
+  namespace: dev
+  labels:
+    app: recommendation-service
+spec:
+  type: ClusterIP
+  selector:
+    app: recommendation-service
+  ports:
+    - port: 1010
+      targetPort: 1010
+      protocol: TCP
