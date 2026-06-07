@@ -1,0 +1,33 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: product-catalog
+  namespace: dev
+  labels:
+    app: product-catalog
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: product-catalog
+  template:
+    metadata:
+      labels:
+        app: product-catalog
+    spec:
+      containers:
+      - name: product-catalog
+        image: basabesso/product-catalog:v2
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 8088
+        env:
+        - name: PRODUCT_CATALOG_PORT
+          value: "8088"
+        resources:
+          limits:
+            memory: "128Mi"
+            cpu: "200m"
+          requests:
+            memory: "64Mi"
+            cpu: "100m"
