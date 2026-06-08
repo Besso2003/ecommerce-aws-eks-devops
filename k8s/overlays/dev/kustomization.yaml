@@ -9,6 +9,7 @@ resources:
   - ../../base/recommendation-service
   - ../../base/currency
   - ../../base/email
+  - ../../base/payment
 
 patches:
   - path: patches/product-catalog-patch.yaml
@@ -31,3 +32,7 @@ patches:
     target:
       kind: Deployment
       name: email
+  - path: patches/payment-patch.yaml
+    target:
+      kind: Deployment
+      name: payment
