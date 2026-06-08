@@ -11,6 +11,7 @@ resources:
   - ../../base/email
   - ../../base/payment
   - ../../base/quote
+  - ../../base/shipping
 
 patches:
   - path: patches/product-catalog-patch.yaml
@@ -41,3 +42,7 @@ patches:
     target:
       kind: Deployment
       name: quote
+  - path: patches/shipping-patch.yaml
+    target:
+      kind: Deployment
+      name: shipping
