@@ -8,6 +8,7 @@ resources:
   - ../../base/ad-service
   - ../../base/recommendation-service
   - ../../base/currency
+  - ../../base/email
 
 patches:
   - path: patches/product-catalog-patch.yaml
@@ -26,3 +27,7 @@ patches:
     target:
       kind: Deployment
       name: currency
+  - path: patches/email-patch.yaml
+    target:
+      kind: Deployment
+      name: email
