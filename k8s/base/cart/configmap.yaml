@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: cart-config
+data:
+  CART_PORT: "7070"
+  VALKEY_ADDR: "valkey:6379"
+  OTEL_SERVICE_NAME: "cart"
+  OTEL_EXPORTER_OTLP_ENDPOINT: "http://localhost:4317"
+  OTEL_EXPORTER_OTLP_METRICS_TEMPORALITY_PREFERENCE: "cumulative"
+  OTEL_RESOURCE_ATTRIBUTES: "service.namespace=opentelemetry-demo"
