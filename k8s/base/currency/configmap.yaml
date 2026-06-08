@@ -7,6 +7,6 @@ data:
   OTEL_SERVICE_NAME: "currency"
   OTEL_EXPORTER_OTLP_ENDPOINT: "http://localhost:4317"
   OTEL_EXPORTER_OTLP_METRICS_TEMPORALITY_PREFERENCE: "cumulative"
-  OTEL_RESOURCE_ATTRIBUTES: "service.namespace=dev"
+  OTEL_RESOURCE_ATTRIBUTES: "service.namespace=opentelemetry-demo"
   VERSION: "latest"
   IPV6_ENABLED: "false"

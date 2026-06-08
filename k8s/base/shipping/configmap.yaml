@@ -8,4 +8,4 @@ data:
   OTEL_SERVICE_NAME: "shipping"
   OTEL_EXPORTER_OTLP_ENDPOINT: "http://localhost:4317"
   OTEL_EXPORTER_OTLP_METRICS_TEMPORALITY_PREFERENCE: "cumulative"
-  OTEL_RESOURCE_ATTRIBUTES: "service.namespace=dev"
+  OTEL_RESOURCE_ATTRIBUTES: "service.namespace=opentelemetry-demo"
