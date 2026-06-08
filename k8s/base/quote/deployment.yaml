@@ -1,0 +1,32 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: quote
+  labels:
+    app: quote
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: quote
+  template:
+    metadata:
+      labels:
+        app: quote
+    spec:
+      containers:
+        - name: quote
+          image: ghcr.io/open-telemetry/demo:latest-quoteservice
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8090
+          envFrom:
+            - configMapRef:
+                name: quote-config
+          resources:
+            requests:
+              cpu: 50m
+              memory: 32Mi
+            limits:
+              cpu: 100m
+              memory: 64Mi

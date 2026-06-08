@@ -10,6 +10,7 @@ resources:
   - ../../base/currency
   - ../../base/email
   - ../../base/payment
+  - ../../base/quote
 
 patches:
   - path: patches/product-catalog-patch.yaml
@@ -36,3 +37,7 @@ patches:
     target:
       kind: Deployment
       name: payment
+  - path: patches/quote-patch.yaml
+    target:
+      kind: Deployment
+      name: quote
