@@ -16,10 +16,11 @@ spec:
     spec:
       containers:
         - name: kafka
-          image: ghcr.io/open-telemetry/demo:latest-kafka
+          image: ghcr.io/open-telemetry/demo:1.12.0-kafka
           imagePullPolicy: Always
           ports:
             - containerPort: 9092
+            - containerPort: 9093
           envFrom:
             - configMapRef:
                 name: kafka-config
