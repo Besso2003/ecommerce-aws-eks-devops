@@ -5,8 +5,8 @@ metadata:
 data:
   CHECKOUT_PORT: "5050"
   CHECKOUT_SERVICE_PORT: "5050"
-  CART_SERVICE_ADDR: "cart:7070"
-  CART_ADDR: "cart:7070"
+  CART_SERVICE_ADDR: "cart:8080"
+  CART_ADDR: "cart:8080"
   CURRENCY_SERVICE_ADDR: "currency:7001"
   CURRENCY_ADDR: "currency:7001"
   EMAIL_SERVICE_ADDR: "http://email:6060"

@@ -9,5 +9,5 @@ spec:
   selector:
     app: cart
   ports:
-    - port: 7070
-      targetPort: 7070
+    - port: 8080
+      targetPort: 8080
