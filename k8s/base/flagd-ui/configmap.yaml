@@ -1,0 +1,8 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: flagd-ui-config
+data:
+  FLAGD_UI_PORT: "4000"
+  FLAGD_HOST: "flagd"
+  FLAGD_OFREP_PORT: "8016"

@@ -19,6 +19,7 @@ resources:
   - ../../base/product-reviews
   - ../../base/image-provider
   - ../../base/flagd
+  - ../../base/flagd-ui
 
 patches:
   - path: patches/product-catalog-patch.yaml
@@ -81,3 +82,7 @@ patches:
     target:
       kind: Deployment
       name: flagd
+  - path: patches/flagd-ui-patch.yaml
+    target:
+      kind: Deployment
+      name: flagd-ui
