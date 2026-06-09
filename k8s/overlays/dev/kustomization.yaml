@@ -25,6 +25,7 @@ resources:
   - ../../base/kafka
   - ../../base/postgres
   - ../../base/frontend
+  - ../../base/frontend-proxy
 
 patches:
   - path: patches/product-catalog-patch.yaml
@@ -111,3 +112,7 @@ patches:
     target:
       kind: Deployment
       name: frontend
+  - path: patches/frontend-proxy-patch.yaml
+    target:
+      kind: Deployment
+      name: frontend-proxy

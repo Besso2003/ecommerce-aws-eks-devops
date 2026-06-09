@@ -1,0 +1,20 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: frontend-proxy-config
+data:
+  ENVOY_PORT: "8080"
+  FRONTEND_HOST: "frontend"
+  FRONTEND_PORT: "8080"
+  FLAGD_HOST: "flagd"
+  FLAGD_PORT: "8013"
+  FLAGD_UI_HOST: "flagd-ui"
+  FLAGD_UI_PORT: "4000"
+  IMAGE_PROVIDER_HOST: "image-provider"
+  IMAGE_PROVIDER_PORT: "8081"
+  LOAD_GENERATOR_HOST: "load-generator"
+  LOAD_GENERATOR_PORT: "8089"
+  GRAFANA_HOST: "grafana"
+  GRAFANA_PORT: "3000"
+  JAEGER_HOST: "jaeger"
+  JAEGER_PORT: "16686"

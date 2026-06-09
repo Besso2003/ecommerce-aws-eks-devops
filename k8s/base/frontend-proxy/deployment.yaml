@@ -1,32 +1,32 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: product-reviews
+  name: frontend-proxy
   labels:
-    app: product-reviews
+    app: frontend-proxy
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: product-reviews
+      app: frontend-proxy
   template:
     metadata:
       labels:
-        app: product-reviews
+        app: frontend-proxy
     spec:
       containers:
-        - name: product-reviews
-          image: ghcr.io/open-telemetry/demo:latest-product-reviews
+        - name: frontend-proxy
+          image: ghcr.io/open-telemetry/demo:latest-frontendproxy
           imagePullPolicy: Always
           ports:
-            - containerPort: 3551
+            - containerPort: 8080
           envFrom:
             - configMapRef:
-                name: product-reviews-config
+                name: frontend-proxy-config
           resources:
             requests:
-              cpu: 50m
+              cpu: 100m
               memory: 64Mi
             limits:
-              cpu: 100m
+              cpu: 200m
               memory: 128Mi
