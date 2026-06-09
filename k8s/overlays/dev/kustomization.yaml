@@ -21,6 +21,7 @@ resources:
   - ../../base/flagd
   - ../../base/flagd-ui
   - ../../base/load-generator
+  - ../../base/valkey
 
 patches:
   - path: patches/product-catalog-patch.yaml
@@ -91,3 +92,7 @@ patches:
     target:
       kind: Deployment
       name: load-generator
+  - path: patches/valkey-patch.yaml
+    target:
+      kind: Deployment
+      name: valkey
