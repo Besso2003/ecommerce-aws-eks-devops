@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: flagd-config
+data:
+  FLAGD_PORT: "8013"
+  OTEL_EXPORTER_OTLP_ENDPOINT: "http://localhost:4317"
