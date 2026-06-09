@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: load-generator-config
+data:
+  LOCUST_WEB_PORT: "8089"
+  LOCUST_USERS: "5"
+  LOCUST_HOST: "http://frontend-proxy:8080"
+  LOCUST_AUTOSTART: "true"
+  LOCUST_HEADLESS: "false"
+  OTEL_EXPORTER_OTLP_ENDPOINT: "http://localhost:4317"
+  OTEL_SERVICE_NAME: "load-generator"
+  OTEL_RESOURCE_ATTRIBUTES: "service.namespace=opentelemetry-demo"

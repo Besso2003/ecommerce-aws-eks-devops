@@ -20,6 +20,7 @@ resources:
   - ../../base/image-provider
   - ../../base/flagd
   - ../../base/flagd-ui
+  - ../../base/load-generator
 
 patches:
   - path: patches/product-catalog-patch.yaml
@@ -86,3 +87,7 @@ patches:
     target:
       kind: Deployment
       name: flagd-ui
+  - path: patches/load-generator-patch.yaml
+    target:
+      kind: Deployment
+      name: load-generator
