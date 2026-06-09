@@ -24,6 +24,7 @@ resources:
   - ../../base/valkey
   - ../../base/kafka
   - ../../base/postgres
+  - ../../base/frontend
 
 patches:
   - path: patches/product-catalog-patch.yaml
@@ -106,3 +107,7 @@ patches:
     target:
       kind: Deployment
       name: postgres
+  - path: patches/frontend-patch.yaml
+    target:
+      kind: Deployment
+      name: frontend

@@ -1,0 +1,19 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: frontend-config
+data:
+  FRONTEND_PORT: "8080"
+  AD_SERVICE_ADDR: "ad-service:9099"
+  CART_SERVICE_ADDR: "cart:7070"
+  CHECKOUT_SERVICE_ADDR: "checkout:5050"
+  CURRENCY_SERVICE_ADDR: "currency:7001"
+  PRODUCT_CATALOG_SERVICE_ADDR: "product-catalog:8088"
+  RECOMMENDATION_SERVICE_ADDR: "recommendation-service:1010"
+  SHIPPING_SERVICE_ADDR: "http://shipping:50050"
+  OTEL_SERVICE_NAME: "frontend"
+  OTEL_EXPORTER_OTLP_ENDPOINT: "http://localhost:4317"
+  OTEL_RESOURCE_ATTRIBUTES: "service.namespace=opentelemetry-demo"
+  ENV_PLATFORM: "local"
+  FLAGD_HOST: "flagd"
+  FLAGD_PORT: "8013"
