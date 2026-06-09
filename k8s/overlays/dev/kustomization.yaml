@@ -15,6 +15,7 @@ resources:
   - ../../base/cart
   - ../../base/checkout
   - ../../base/fraud-detection
+  - ../../base/accounting
 
 patches:
   - path: patches/product-catalog-patch.yaml
@@ -61,3 +62,7 @@ patches:
     target:
       kind: Deployment
       name: fraud-detection
+  - path: patches/accounting-patch.yaml
+    target:
+      kind: Deployment
+      name: accounting

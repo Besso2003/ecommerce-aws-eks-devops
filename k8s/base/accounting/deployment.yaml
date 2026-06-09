@@ -1,0 +1,32 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: accounting
+  labels:
+    app: accounting
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: accounting
+  template:
+    metadata:
+      labels:
+        app: accounting
+    spec:
+      containers:
+        - name: accounting
+          image: ghcr.io/open-telemetry/demo:latest-accountingservice
+          imagePullPolicy: Always
+          envFrom:
+            - configMapRef:
+                name: accounting-config
+            - secretRef:
+                name: accounting-secret
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+            limits:
+              cpu: 200m
+              memory: 256Mi
