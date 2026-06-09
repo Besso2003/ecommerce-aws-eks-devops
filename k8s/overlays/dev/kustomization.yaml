@@ -22,6 +22,7 @@ resources:
   - ../../base/flagd-ui
   - ../../base/load-generator
   - ../../base/valkey
+  - ../../base/kafka
 
 patches:
   - path: patches/product-catalog-patch.yaml
@@ -96,3 +97,7 @@ patches:
     target:
       kind: Deployment
       name: valkey
+  - path: patches/kafka-patch.yaml
+    target:
+      kind: Deployment
+      name: kafka
