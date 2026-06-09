@@ -26,6 +26,7 @@ resources:
   - ../../base/postgres
   - ../../base/frontend
   - ../../base/frontend-proxy
+  - ../../base/llm
 
 patches:
   - path: patches/product-catalog-patch.yaml
@@ -116,3 +117,7 @@ patches:
     target:
       kind: Deployment
       name: frontend-proxy
+  - path: patches/llm-patch.yaml
+    target:
+      kind: Deployment
+      name: llm
