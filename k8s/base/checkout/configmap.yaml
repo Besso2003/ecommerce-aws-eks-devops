@@ -9,7 +9,7 @@ data:
   EMAIL_SERVICE_ADDR: "http://email:6060"
   PAYMENT_SERVICE_ADDR: "payment:50051"
   PRODUCT_CATALOG_SERVICE_ADDR: "product-catalog:8088"
-  SHIPPING_SERVICE_ADDR: "http://shipping:50050"
+  SHIPPING_ADDR: "shipping:50050" 
   FLAGD_HOST: "flagd"
   FLAGD_PORT: "8013"
   OTEL_SERVICE_NAME: "checkout"

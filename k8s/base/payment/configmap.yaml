@@ -5,6 +5,7 @@ metadata:
 data:
   PAYMENT_PORT: "50051"
   OTEL_SERVICE_NAME: "payment"
-  OTEL_EXPORTER_OTLP_ENDPOINT: "http://localhost:4317"
-  OTEL_EXPORTER_OTLP_METRICS_TEMPORALITY_PREFERENCE: "cumulative"
-  OTEL_RESOURCE_ATTRIBUTES: "service.namespace=opentelemetry-demo"
+  OTEL_SDK_DISABLED: "true"
+  # OTEL_EXPORTER_OTLP_ENDPOINT: "http://localhost:4317"
+  # OTEL_EXPORTER_OTLP_METRICS_TEMPORALITY_PREFERENCE: "cumulative"
+  # OTEL_RESOURCE_ATTRIBUTES: "service.namespace=opentelemetry-demo"
