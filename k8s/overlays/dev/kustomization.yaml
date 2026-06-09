@@ -23,6 +23,7 @@ resources:
   - ../../base/load-generator
   - ../../base/valkey
   - ../../base/kafka
+  - ../../base/postgres
 
 patches:
   - path: patches/product-catalog-patch.yaml
@@ -101,3 +102,7 @@ patches:
     target:
       kind: Deployment
       name: kafka
+  - path: patches/postgres-patch.yaml
+    target:
+      kind: Deployment
+      name: postgres
