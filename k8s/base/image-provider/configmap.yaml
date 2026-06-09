@@ -1,0 +1,9 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: image-provider-config
+data:
+  IMAGE_PROVIDER_PORT: "8081"
+  OTEL_SERVICE_NAME: "image-provider"
+  OTEL_EXPORTER_OTLP_ENDPOINT: "http://localhost:4317"
+  OTEL_RESOURCE_ATTRIBUTES: "service.namespace=opentelemetry-demo"

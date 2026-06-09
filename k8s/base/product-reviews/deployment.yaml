@@ -1,0 +1,32 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: product-reviews
+  labels:
+    app: product-reviews
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: product-reviews
+  template:
+    metadata:
+      labels:
+        app: product-reviews
+    spec:
+      containers:
+        - name: product-reviews
+          image: ghcr.io/open-telemetry/demo:2.2.0-productreviewsservice
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 3551
+          envFrom:
+            - configMapRef:
+                name: product-reviews-config
+          resources:
+            requests:
+              cpu: 50m
+              memory: 64Mi
+            limits:
+              cpu: 100m
+              memory: 128Mi
