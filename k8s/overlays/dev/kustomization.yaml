@@ -13,6 +13,7 @@ resources:
   - ../../base/quote
   - ../../base/shipping
   - ../../base/cart
+  - ../../base/checkout
 
 patches:
   - path: patches/product-catalog-patch.yaml
@@ -51,3 +52,7 @@ patches:
     target:
       kind: Deployment
       name: cart
+  - path: patches/checkout-patch.yaml
+    target:
+      kind: Deployment
+      name: checkout
