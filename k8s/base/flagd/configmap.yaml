@@ -5,3 +5,39 @@ metadata:
 data:
   FLAGD_PORT: "8013"
   OTEL_EXPORTER_OTLP_ENDPOINT: "http://localhost:4317"
+  demo.flagd.json: |
+    {
+      "$schema": "https://flagd.dev/schema/v0/flags.json",
+      "flags": {
+        "adFailure": {
+          "state": "ENABLED",
+          "variants": { "on": true, "off": false },
+          "defaultVariant": "off"
+        },
+        "adManualGc": {
+          "state": "ENABLED",
+          "variants": { "on": true, "off": false },
+          "defaultVariant": "off"
+        },
+        "adHighCpu": {
+          "state": "ENABLED",
+          "variants": { "on": true, "off": false },
+          "defaultVariant": "off"
+        },
+        "cartFailure": {
+          "state": "ENABLED",
+          "variants": { "on": true, "off": false },
+          "defaultVariant": "off"
+        },
+        "productCatalogFailure": {
+          "state": "ENABLED",
+          "variants": { "on": true, "off": false },
+          "defaultVariant": "off"
+        },
+        "recommendationServiceCacheFailure": {
+          "state": "ENABLED",
+          "variants": { "on": true, "off": false },
+          "defaultVariant": "off"
+        }
+      }
+    }
