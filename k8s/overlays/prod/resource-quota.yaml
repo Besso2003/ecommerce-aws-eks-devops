@@ -1,0 +1,23 @@
+apiVersion: v1
+kind: ResourceQuota
+metadata:
+  name: prod-quota
+  namespace: prod
+  labels:
+    app.kubernetes.io/managed-by: kustomize
+    app.kubernetes.io/part-of: ecommerce
+    environment: prod
+spec:
+  hard:
+    # CPU
+    requests.cpu: "12000m"
+    limits.cpu: "24000m"
+    # Memory
+    requests.memory: "12Gi"
+    limits.memory: "24Gi"
+    # Object counts
+    pods: "120"
+    services: "40"
+    persistentvolumeclaims: "10"
+    secrets: "20"
+    configmaps: "40"
