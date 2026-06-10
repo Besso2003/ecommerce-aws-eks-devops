@@ -23,6 +23,9 @@ spec:
           envFrom:
             - secretRef:
                 name: postgres-secret
+          volumeMounts:
+            - name: postgres-data
+              mountPath: /var/lib/postgresql/data
           resources:
             requests:
               cpu: 100m

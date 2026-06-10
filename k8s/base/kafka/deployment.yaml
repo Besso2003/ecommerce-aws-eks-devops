@@ -24,6 +24,9 @@ spec:
           envFrom:
             - configMapRef:
                 name: kafka-config
+          volumeMounts:
+            - name: kafka-data
+              mountPath: /var/lib/kafka/data
           resources:
             requests:
               cpu: 200m
@@ -31,3 +34,7 @@ spec:
             limits:
               cpu: 500m
               memory: 600Mi
+      volumes:
+        - name: kafka-data
+          persistentVolumeClaim:
+            claimName: kafka-pvc
