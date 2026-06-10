@@ -1,13 +1,13 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: product-catalog
+  name: accounting
 spec:
   replicas: 3
   template:
     spec:
       containers:
-        - name: product-catalog
+        - name: accounting
           resources:
             requests:
               cpu: 400m

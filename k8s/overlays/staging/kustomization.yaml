@@ -1,0 +1,123 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: staging
+
+resources:
+  - ../../base/product-catalog
+  - ../../base/ad-service
+  - ../../base/recommendation-service
+  - ../../base/currency
+  - ../../base/email
+  - ../../base/payment
+  - ../../base/quote
+  - ../../base/shipping
+  - ../../base/cart
+  - ../../base/checkout
+  - ../../base/fraud-detection
+  - ../../base/accounting
+  - ../../base/product-reviews
+  - ../../base/image-provider
+  - ../../base/load-generator
+  - ../../base/flagd
+  - ../../base/flagd-ui
+  - ../../base/valkey
+  - ../../base/kafka
+  - ../../base/postgres
+  - ../../base/frontend
+  - ../../base/frontend-proxy
+  - ../../base/llm
+
+patches:
+  - path: patches/product-catalog-patch.yaml
+    target:
+      kind: Deployment
+      name: product-catalog
+  - path: patches/ad-service-patch.yaml
+    target:
+      kind: Deployment
+      name: ad-service
+  - path: patches/recommendation-service-patch.yaml
+    target:
+      kind: Deployment
+      name: recommendation-service
+  - path: patches/currency-patch.yaml
+    target:
+      kind: Deployment
+      name: currency
+  - path: patches/email-patch.yaml
+    target:
+      kind: Deployment
+      name: email
+  - path: patches/payment-patch.yaml
+    target:
+      kind: Deployment
+      name: payment
+  - path: patches/quote-patch.yaml
+    target:
+      kind: Deployment
+      name: quote
+  - path: patches/shipping-patch.yaml
+    target:
+      kind: Deployment
+      name: shipping
+  - path: patches/cart-patch.yaml
+    target:
+      kind: Deployment
+      name: cart
+  - path: patches/checkout-patch.yaml
+    target:
+      kind: Deployment
+      name: checkout
+  - path: patches/fraud-detection-patch.yaml
+    target:
+      kind: Deployment
+      name: fraud-detection
+  - path: patches/accounting-patch.yaml
+    target:
+      kind: Deployment
+      name: accounting
+  - path: patches/product-reviews-patch.yaml
+    target:
+      kind: Deployment
+      name: product-reviews
+  - path: patches/image-provider-patch.yaml
+    target:
+      kind: Deployment
+      name: image-provider
+  - path: patches/load-generator-patch.yaml
+    target:
+      kind: Deployment
+      name: load-generator
+  - path: patches/flagd-patch.yaml
+    target:
+      kind: Deployment
+      name: flagd
+  - path: patches/flagd-ui-patch.yaml
+    target:
+      kind: Deployment
+      name: flagd-ui
+  - path: patches/valkey-patch.yaml
+    target:
+      kind: Deployment
+      name: valkey
+  - path: patches/kafka-patch.yaml
+    target:
+      kind: Deployment
+      name: kafka
+  - path: patches/postgres-patch.yaml
+    target:
+      kind: Deployment
+      name: postgres
+  - path: patches/frontend-patch.yaml
+    target:
+      kind: Deployment
+      name: frontend
+  - path: patches/frontend-proxy-patch.yaml
+    target:
+      kind: Deployment
+      name: frontend-proxy
+  - path: patches/llm-patch.yaml
+    target:
+      kind: Deployment
+      name: llm

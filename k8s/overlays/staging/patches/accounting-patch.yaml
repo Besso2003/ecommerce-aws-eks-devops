@@ -1,17 +1,17 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: flagd-ui
+  name: accounting
 spec:
-  replicas: 1
+  replicas: 2
   template:
     spec:
       containers:
-        - name: flagd-ui
+        - name: accounting
           resources:
             requests:
-              cpu: 100m
-              memory: 64Mi
-            limits:
               cpu: 200m
               memory: 128Mi
+            limits:
+              cpu: 400m
+              memory: 256Mi

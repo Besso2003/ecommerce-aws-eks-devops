@@ -1,17 +1,17 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: quote
+  name: llm
 spec:
-  replicas: 1
+  replicas: 3
   template:
     spec:
       containers:
-        - name: quote
+        - name: llm
           resources:
             requests:
-              cpu: 100m
-              memory: 64Mi
+              cpu: 400m
+              memory: 256Mi
             limits:
-              cpu: 200m
-              memory: 128Mi
+              cpu: 500m
+              memory: 512Mi
