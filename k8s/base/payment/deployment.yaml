@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
         - name: payment
-          image: ghcr.io/open-telemetry/demo:1.12.0-paymentservice
+          image: basabesso/paymentservice:v2
           imagePullPolicy: Always
           ports:
             - containerPort: 50051
