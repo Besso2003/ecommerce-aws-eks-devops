@@ -4,7 +4,7 @@ metadata:
   name: flagd-config
 data:
   FLAGD_PORT: "8013"
-  OTEL_EXPORTER_OTLP_ENDPOINT: "http://localhost:4317"
+  OTEL_SDK_DISABLED: "true"
   demo.flagd.json: |
     {
       "$schema": "https://flagd.dev/schema/v0/flags.json",

@@ -5,4 +5,4 @@ metadata:
 data:
   LLM_PORT: "8000"
   OTEL_SERVICE_NAME: "llm"
-  OTEL_EXPORTER_OTLP_ENDPOINT: "http://localhost:4317"
+  OTEL_SDK_DISABLED: "true"

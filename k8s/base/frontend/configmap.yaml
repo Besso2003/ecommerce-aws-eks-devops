@@ -30,6 +30,5 @@ data:
   ENV_PLATFORM: "local"
   FLAGD_HOST: "flagd"
   FLAGD_PORT: "8013"
-
   PRODUCT_REVIEWS_SERVICE_ADDR: "product-reviews:3551"
   LLM_SERVICE_ADDR: "llm:8000"

@@ -5,7 +5,6 @@ metadata:
 data:
   PRODUCT_REVIEWS_PORT: "3551"
   OTEL_SERVICE_NAME: "product-reviews"
-  OTEL_EXPORTER_OTLP_ENDPOINT: "http://localhost:4317"
   DB_CONNECTION_STRING: "host=postgresql user=otel password=otel dbname=otel"
   LLM_HOST: "llm"
   LLM_PORT: "8000"

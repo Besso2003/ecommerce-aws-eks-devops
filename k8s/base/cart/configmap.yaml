@@ -6,6 +6,6 @@ data:
   CART_PORT: "8080"
   VALKEY_ADDR: "valkey:6379"
   OTEL_SERVICE_NAME: "cart"
-  OTEL_EXPORTER_OTLP_ENDPOINT: "http://localhost:4317"
+  OTEL_SDK_DISABLED: "true"
   OTEL_EXPORTER_OTLP_METRICS_TEMPORALITY_PREFERENCE: "cumulative"
   OTEL_RESOURCE_ATTRIBUTES: "service.namespace=opentelemetry-demo"
