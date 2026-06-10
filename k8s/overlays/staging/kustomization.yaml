@@ -4,6 +4,7 @@ kind: Kustomization
 namespace: staging
 
 resources:
+  - namespace.yaml
   - ../../base/product-catalog
   - ../../base/ad-service
   - ../../base/recommendation-service

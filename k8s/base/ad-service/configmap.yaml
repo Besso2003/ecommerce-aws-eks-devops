@@ -4,3 +4,5 @@ metadata:
   name: ad-service-config
 data:
   AD_PORT: "9099"
+  FLAGD_HOST: "flagd"
+  FLAGD_PORT: "8013"

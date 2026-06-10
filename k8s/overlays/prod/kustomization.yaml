@@ -4,6 +4,7 @@ kind: Kustomization
 namespace: prod
 
 resources:
+  - namespace.yaml
   - ../../base/product-catalog
   - ../../base/ad-service
   - ../../base/recommendation-service
