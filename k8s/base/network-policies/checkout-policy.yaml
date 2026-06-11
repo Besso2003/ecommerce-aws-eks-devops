@@ -1,0 +1,67 @@
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: checkout-policy
+spec:
+  podSelector:
+    matchLabels:
+      app: checkout
+  policyTypes:
+    - Ingress
+    - Egress
+  ingress:
+    - from:
+        - podSelector:
+            matchLabels:
+              app: frontend
+      ports:
+        - port: 5050
+  egress:
+    - to:
+        - podSelector:
+            matchLabels:
+              app: cart
+      ports:
+        - port: 8080
+    - to:
+        - podSelector:
+            matchLabels:
+              app: currency
+      ports:
+        - port: 7001
+    - to:
+        - podSelector:
+            matchLabels:
+              app: email
+      ports:
+        - port: 6060
+    - to:
+        - podSelector:
+            matchLabels:
+              app: payment
+      ports:
+        - port: 50051
+    - to:
+        - podSelector:
+            matchLabels:
+              app: product-catalog
+      ports:
+        - port: 8088
+    - to:
+        - podSelector:
+            matchLabels:
+              app: shipping
+      ports:
+        - port: 50050
+    - to:
+        - podSelector:
+            matchLabels:
+              app: kafka
+      ports:
+        - port: 9092
+    - to:
+        - podSelector:
+            matchLabels:
+              app: flagd
+      ports:
+        - port: 8013

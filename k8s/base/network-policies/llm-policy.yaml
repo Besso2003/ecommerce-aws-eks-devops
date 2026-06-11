@@ -1,0 +1,19 @@
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: llm-policy
+spec:
+  podSelector:
+    matchLabels:
+      app: llm
+  policyTypes:
+    - Ingress
+    - Egress
+  ingress:
+    - from:
+        - podSelector:
+            matchLabels:
+              app: product-reviews
+      ports:
+        - port: 8000
+  egress: []

@@ -1,0 +1,25 @@
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: fraud-detection-policy
+spec:
+  podSelector:
+    matchLabels:
+      app: fraud-detection
+  policyTypes:
+    - Ingress
+    - Egress
+  ingress: []    # no one calls fraud-detection directly
+  egress:
+    - to:
+        - podSelector:
+            matchLabels:
+              app: kafka
+      ports:
+        - port: 9092
+    - to:
+        - podSelector:
+            matchLabels:
+              app: flagd
+      ports:
+        - port: 8013

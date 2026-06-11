@@ -1,0 +1,28 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - default-deny-all.yaml
+  - allow-dns.yaml
+  - frontend-proxy-policy.yaml
+  - frontend-policy.yaml
+  - ad-service-policy.yaml
+  - cart-policy.yaml
+  - checkout-policy.yaml
+  - currency-policy.yaml
+  - payment-policy.yaml
+  - email-policy.yaml
+  - shipping-policy.yaml
+  - quote-policy.yaml
+  - recommendation-service-policy.yaml
+  - product-catalog-policy.yaml
+  - product-reviews-policy.yaml
+  - fraud-detection-policy.yaml
+  - accounting-policy.yaml
+  - kafka-policy.yaml
+  - postgres-policy.yaml
+  - valkey-policy.yaml
+  - flagd-policy.yaml
+  - flagd-ui-policy.yaml
+  - image-provider-policy.yaml
+  - load-generator-policy.yaml
+  - llm-policy.yaml

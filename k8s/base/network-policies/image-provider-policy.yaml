@@ -1,0 +1,19 @@
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: image-provider-policy
+spec:
+  podSelector:
+    matchLabels:
+      app: image-provider
+  policyTypes:
+    - Ingress
+    - Egress
+  ingress:
+    - from:
+        - podSelector:
+            matchLabels:
+              app: frontend-proxy
+      ports:
+        - port: 8081
+  egress: []

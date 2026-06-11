@@ -1,0 +1,25 @@
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: postgres-policy
+spec:
+  podSelector:
+    matchLabels:
+      app: postgres
+  policyTypes:
+    - Ingress
+    - Egress
+  ingress:
+    - from:
+        - podSelector:
+            matchLabels:
+              app: accounting
+      ports:
+        - port: 5432
+    - from:
+        - podSelector:
+            matchLabels:
+              app: product-reviews
+      ports:
+        - port: 5432
+  egress: []    # postgres is a database and doesn't call other services, so no egress rules are needed --- IGNORE ---

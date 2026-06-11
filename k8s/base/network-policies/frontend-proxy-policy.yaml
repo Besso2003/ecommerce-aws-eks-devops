@@ -1,0 +1,45 @@
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: frontend-proxy-policy
+spec:
+  podSelector:
+    matchLabels:
+      app: frontend-proxy
+  policyTypes:
+    - Ingress
+    - Egress
+  ingress:
+    - {}
+  egress:
+    - to:
+        - podSelector:
+            matchLabels:
+              app: frontend
+      ports:
+        - port: 8080
+    - to:
+        - podSelector:
+            matchLabels:
+              app: flagd
+      ports:
+        - port: 8013
+        - port: 8016
+    - to:
+        - podSelector:
+            matchLabels:
+              app: flagd-ui
+      ports:
+        - port: 4000
+    - to:
+        - podSelector:
+            matchLabels:
+              app: image-provider
+      ports:
+        - port: 8081
+    - to:
+        - podSelector:
+            matchLabels:
+              app: load-generator
+      ports:
+        - port: 8089

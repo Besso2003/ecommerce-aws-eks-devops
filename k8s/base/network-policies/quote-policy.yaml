@@ -1,0 +1,19 @@
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: quote-policy
+spec:
+  podSelector:
+    matchLabels:
+      app: quote
+  policyTypes:
+    - Ingress
+    - Egress
+  ingress:
+    - from:
+        - podSelector:
+            matchLabels:
+              app: shipping
+      ports:
+        - port: 8090
+  egress: []

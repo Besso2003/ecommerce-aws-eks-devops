@@ -1,0 +1,25 @@
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: payment-policy
+spec:
+  podSelector:
+    matchLabels:
+      app: payment
+  policyTypes:
+    - Ingress
+    - Egress
+  ingress:
+    - from:
+        - podSelector:
+            matchLabels:
+              app: checkout
+      ports:
+        - port: 50051
+  egress:
+    - to:
+        - podSelector:
+            matchLabels:
+              app: flagd
+      ports:
+        - port: 8013
