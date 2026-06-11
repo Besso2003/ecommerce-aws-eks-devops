@@ -5,6 +5,7 @@ namespace: dev
 
 resources:
   - namespace.yaml
+  - ingress.yaml
   - ../../base/product-catalog
   - ../../base/ad-service
   - ../../base/recommendation-service
