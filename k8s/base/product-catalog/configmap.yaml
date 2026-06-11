@@ -4,3 +4,5 @@ metadata:
   name: product-catalog-config
 data:
   PRODUCT_CATALOG_PORT: "8088"
+  FLAGD_HOST: "flagd"
+  FLAGD_PORT: "8013"

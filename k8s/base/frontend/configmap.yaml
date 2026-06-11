@@ -25,7 +25,7 @@ data:
   OTEL_RESOURCE_ATTRIBUTES: "service.namespace=opentelemetry-demo"
   OTEL_EXPORTER_OTLP_METRICS_TEMPORALITY_PREFERENCE: "cumulative"
   WEB_OTEL_SERVICE_NAME: "frontend-web"
-  PUBLIC_OTEL_EXPORTER_OTLP_TRACES_ENDPOINT: "http://localhost:8080/otlp-http/v1/traces"
+  PUBLIC_OTEL_EXPORTER_OTLP_TRACES_ENDPOINT: ""
   OTEL_COLLECTOR_HOST: "otel-collector"
   ENV_PLATFORM: "local"
   FLAGD_HOST: "flagd"
