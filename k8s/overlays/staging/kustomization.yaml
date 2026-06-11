@@ -5,6 +5,7 @@ namespace: staging
 
 resources:
   - namespace.yaml
+  - resource-quota.yaml
   - ../../base/product-catalog
   - ../../base/ad-service
   - ../../base/recommendation-service
