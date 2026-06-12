@@ -71,7 +71,7 @@ Stateful services (postgres, kafka, valkey) also include:
 
 ```
   pvc.yaml              # PersistentVolumeClaim for durable storage
-  secret.yaml           # Sensitive credentials (passwords, tokens)
+  sealed-secret.yaml    # Encrypted credentials that generate Kubernetes Secrets for Sensitive credentials (passwords, tokens)
 ```
 
 ---
