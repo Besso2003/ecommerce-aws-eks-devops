@@ -34,6 +34,18 @@ spec:
             limits:
               cpu: 200m
               memory: 256Mi
+          startupProbe:
+            exec:
+              command: [pg_isready, -U, otel]
+            initialDelaySeconds: 10
+            periodSeconds: 5
+            failureThreshold: 10
+          livenessProbe:
+            exec:
+              command: [pg_isready, -U, otel]
+            initialDelaySeconds: 50
+            periodSeconds: 10
+            failureThreshold: 3
           readinessProbe:
             exec:
               command:
