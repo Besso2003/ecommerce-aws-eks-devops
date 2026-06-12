@@ -33,6 +33,14 @@ spec:
             limits:
               cpu: 200m
               memory: 256Mi
+          readinessProbe:
+            exec:
+              command:
+                - pg_isready
+                - -U
+                - otel
+            initialDelaySeconds: 30
+            periodSeconds: 5
       volumes:
         - name: postgres-data
           persistentVolumeClaim:

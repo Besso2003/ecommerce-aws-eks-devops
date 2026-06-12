@@ -30,3 +30,14 @@ spec:
             limits:
               cpu: 200m
               memory: 256Mi
+          livenessProbe:
+            grpc:
+              port: 1010
+            initialDelaySeconds: 15
+            periodSeconds: 10
+            failureThreshold: 3
+          readinessProbe:
+            grpc:
+              port: 1010
+            initialDelaySeconds: 10
+            periodSeconds: 5

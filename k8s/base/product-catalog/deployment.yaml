@@ -30,3 +30,14 @@ spec:
           requests:
             memory: "64Mi"
             cpu: "100m"
+        livenessProbe:
+          grpc:
+            port: 8088
+          initialDelaySeconds: 10
+          periodSeconds: 10
+          failureThreshold: 3
+        readinessProbe:
+          grpc:
+            port: 8088
+          initialDelaySeconds: 5
+          periodSeconds: 5

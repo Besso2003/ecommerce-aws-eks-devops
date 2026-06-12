@@ -30,6 +30,16 @@ spec:
             limits:
               cpu: 100m
               memory: 128Mi
+          livenessProbe:
+            tcpSocket:
+              port: 6379
+            initialDelaySeconds: 10
+            periodSeconds: 10
+          readinessProbe:
+            tcpSocket:
+              port: 6379
+            initialDelaySeconds: 5
+            periodSeconds: 5
       volumes:
         - name: valkey-data
           persistentVolumeClaim:
