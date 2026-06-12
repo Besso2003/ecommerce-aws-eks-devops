@@ -14,6 +14,7 @@ spec:
       labels:
         app: recommendation-service
     spec:
+      serviceAccountName: recommendation-service-sa
       containers:
         - name: recommendation-service
           image: basabesso/recommendationservice:v1

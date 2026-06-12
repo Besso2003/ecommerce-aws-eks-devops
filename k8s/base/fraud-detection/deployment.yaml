@@ -14,6 +14,7 @@ spec:
       labels:
         app: fraud-detection
     spec:
+      serviceAccountName: fraud-detection-sa
       containers:
         - name: fraud-detection
           image: ghcr.io/open-telemetry/demo:latest-frauddetectionservice

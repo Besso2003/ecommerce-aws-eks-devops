@@ -14,6 +14,7 @@ spec:
       labels:
         app: product-catalog
     spec:
+      serviceAccountName: product-catalog-sa
       containers:
       - name: product-catalog
         image: basabesso/product-catalog:v2

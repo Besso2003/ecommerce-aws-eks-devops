@@ -14,6 +14,7 @@ spec:
       labels:
         app: frontend-proxy
     spec:
+      serviceAccountName: frontend-proxy-sa
       containers:
         - name: frontend-proxy
           image: ghcr.io/open-telemetry/demo:latest-frontendproxy

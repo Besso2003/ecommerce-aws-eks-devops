@@ -14,6 +14,7 @@ spec:
       labels:
         app: quote
     spec:
+      serviceAccountName: quote-sa
       containers:
         - name: quote
           image: ghcr.io/open-telemetry/demo:latest-quoteservice

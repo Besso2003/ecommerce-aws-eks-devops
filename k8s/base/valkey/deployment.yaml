@@ -14,6 +14,7 @@ spec:
       labels:
         app: valkey
     spec:
+      serviceAccountName: valkey-sa
       containers:
         - name: valkey
           image: valkey/valkey:9.0.2-alpine3.23

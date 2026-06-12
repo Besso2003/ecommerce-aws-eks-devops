@@ -1,22 +1,22 @@
-apiVersion: v1
-kind: ResourceQuota
-metadata:
-  name: staging-quota
-  namespace: staging
-  labels:
-    app.kubernetes.io/managed-by: kustomize
-    app.kubernetes.io/part-of: ecommerce
-    environment: staging
-spec:
-  hard:
-    requests.cpu: "6000m"
-    limits.cpu: "12000m"
+# apiVersion: v1
+# kind: ResourceQuota
+# metadata:
+#   name: staging-quota
+#   namespace: staging
+#   labels:
+#     app.kubernetes.io/managed-by: kustomize
+#     app.kubernetes.io/part-of: ecommerce
+#     environment: staging
+# spec:
+#   hard:
+#     requests.cpu: "6000m"
+#     limits.cpu: "12000m"
     
-    requests.memory: "6Gi"
-    limits.memory: "12Gi"
+#     requests.memory: "6Gi"
+#     limits.memory: "12Gi"
   
-    pods: "80"
-    services: "40"
-    persistentvolumeclaims: "10"
-    secrets: "20"
-    configmaps: "40"
+#     pods: "80"
+#     services: "40"
+#     persistentvolumeclaims: "10"
+#     secrets: "20"
+#     configmaps: "40"

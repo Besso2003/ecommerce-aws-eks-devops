@@ -14,6 +14,7 @@ spec:
       labels:
         app: product-reviews
     spec:
+      serviceAccountName: product-reviews-sa
       containers:
         - name: product-reviews
           image: ghcr.io/open-telemetry/demo:latest-product-reviews

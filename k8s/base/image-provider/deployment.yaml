@@ -14,6 +14,7 @@ spec:
       labels:
         app: image-provider
     spec:
+      serviceAccountName: image-provider-sa
       containers:
         - name: image-provider
           image: ghcr.io/open-telemetry/demo:latest-imageprovider

@@ -14,6 +14,7 @@ spec:
       labels:
         app: frontend
     spec:
+      serviceAccountName: frontend-sa
       containers:
         - name: frontend
           image: ghcr.io/open-telemetry/demo:latest-frontend

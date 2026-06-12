@@ -14,6 +14,7 @@ spec:
       labels:
         app: checkout
     spec:
+      serviceAccountName: checkout-sa
       containers:
         - name: checkout
           image: ghcr.io/open-telemetry/demo:latest-checkoutservice

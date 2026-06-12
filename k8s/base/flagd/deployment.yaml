@@ -14,6 +14,7 @@ spec:
       labels:
         app: flagd
     spec:
+      serviceAccountName: flagd-sa
       containers:
         - name: flagd
           image: ghcr.io/open-feature/flagd:v0.14.2
