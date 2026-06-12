@@ -5,3 +5,4 @@ resources:
   - deployment.yaml
   - configmap.yaml
   - hpa.yaml
+  - pdb.yaml

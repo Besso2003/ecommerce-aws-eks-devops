@@ -6,3 +6,4 @@ resources:
   - service.yaml
   - pvc.yaml
   - sealed-secret.yaml
+  - pdb.yaml

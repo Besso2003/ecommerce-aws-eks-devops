@@ -29,7 +29,6 @@ resources:
   - ../../base/frontend
   - ../../base/frontend-proxy
   - ../../base/llm
-
 patches:
   - path: patches/product-catalog-patch.yaml
     target:
@@ -123,3 +122,12 @@ patches:
     target:
       kind: Deployment
       name: llm
+  - patch: |
+      apiVersion: policy/v1
+      kind: PodDisruptionBudget
+      metadata:
+        name: not-important
+      spec:
+        minAvailable: 2
+    target:
+      kind: PodDisruptionBudget
