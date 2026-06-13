@@ -193,9 +193,6 @@ Valkey (Redis-compatible) starts in under 1 second. A startupProbe would add unn
 ```bash
 # Kind (local)
 kind create cluster --name ecommerce
-
-# Or EKS (AWS)
-aws eks update-kubeconfig --name ecommerce-dev --region us-east-1
 ```
 
 ### Apply an environment
