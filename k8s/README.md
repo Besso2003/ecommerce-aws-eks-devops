@@ -71,7 +71,7 @@ Stateful services (postgres, kafka, valkey) also include:
 
 ```
   pvc.yaml              # PersistentVolumeClaim for durable storage
-  sealed-secret.yaml    # Encrypted credentials that generate Kubernetes Secrets for Sensitive credentials (passwords, tokens)
+  sealed-secret.yaml    # Encrypted credentials stored safely in Git
 ```
 
 ---
@@ -133,6 +133,56 @@ Key policies:
 - `default-deny-all.yaml` — blocks all ingress and egress for every pod
 - `allow-dns.yaml` — allows all pods to reach kube-dns (required for service discovery)
 - Per-service policies — only open the specific ports and directions each service needs
+
+---
+
+## Health Probes
+
+Every service has probes configured to ensure Kubernetes only routes traffic to healthy pods and automatically restarts stuck ones. Three probe types are used depending on the service's characteristics.
+
+### Probe Types
+
+**startupProbe** — runs only during pod startup. Kubernetes waits for this to pass before running liveness or readiness probes. Used for slow-starting services like Kafka and Postgres that need time to initialize before accepting connections.
+
+**readinessProbe** — tells Kubernetes when the pod is ready to receive traffic. A failing readiness probe removes the pod from the Service endpoints without restarting it. Used by every service.
+
+**livenessProbe** — tells Kubernetes when to restart a pod. Only used when a stuck/deadlocked process won't recover on its own. Not used for Kafka — a slow broker is better than a restarting one.
+
+### Probe Matrix
+
+| Service | Startup | Readiness | Liveness | Method |
+|---|---|---|---|---|
+| product-catalog | ✓ | ✓ | ✓ | gRPC |
+| ad-service | ✓ | ✓ | ✓ | gRPC |
+| recommendation-service | ✓ | ✓ | ✓ | gRPC |
+| cart | ✓ | ✓ | ✓ | gRPC |
+| checkout | ✓ | ✓ | ✓ | gRPC |
+| payment | ✓ | ✓ | ✓ | gRPC |
+| shipping | ✓ | ✓ | ✓ | gRPC |
+| currency | ✓ | ✓ | ✓ | TCP |
+| email | — | ✓ | ✓ | TCP |
+| frontend | ✓ | ✓ | ✓ | HTTP GET / |
+| frontend-proxy | — | ✓ | ✓ | HTTP GET / |
+| image-provider | — | ✓ | ✓ | HTTP GET / |
+| quote | — | ✓ | ✓ | HTTP GET / |
+| load-generator | — | ✓ | ✓ | HTTP GET / |
+| llm | — | ✓ | ✓ | HTTP GET / |
+| flagd | — | ✓ | ✓ | HTTP GET /readyz |
+| flagd-ui | — | ✓ | ✓ | TCP |
+| fraud-detection | — | ✓ | — | TCP |
+| accounting | — | ✓ | — | TCP |
+| product-reviews | — | ✓ | ✓ | TCP |
+| postgres | ✓ | ✓ | ✓ | pg_isready |
+| kafka | ✓ | ✓ | ✗ | TCP |
+| valkey | ✗ | ✓ | ✓ | TCP |
+
+### Why Kafka has no livenessProbe
+
+Kafka is a stateful message broker. If it becomes temporarily slow due to high load, a liveness probe restart would cause it to lose in-flight messages and force consumers to replay from their last committed offset. A slow Kafka is recoverable — a restarting Kafka causes cascading failures across checkout, fraud-detection, and accounting. The startupProbe gives Kafka up to 10 minutes to initialize, and the readinessProbe removes it from traffic if it becomes unresponsive, without triggering a destructive restart.
+
+### Why Valkey has no startupProbe
+
+Valkey (Redis-compatible) starts in under 1 second. A startupProbe would add unnecessary delay before the readiness check begins. The readinessProbe with a 5-second initial delay is sufficient.
 
 ---
 
