@@ -1,10 +1,11 @@
 apiVersion: apps/v1
-kind: Deployment
+kind: StatefulSet
 metadata:
   name: valkey
   labels:
     app: valkey
 spec:
+  serviceName: valkey-headless
   replicas: 1
   selector:
     matchLabels:
@@ -41,7 +42,11 @@ spec:
               port: 6379
             initialDelaySeconds: 5
             periodSeconds: 5
-      volumes:
-        - name: valkey-data
-          persistentVolumeClaim:
-            claimName: valkey-pvc
+  volumeClaimTemplates:
+    - metadata:
+        name: valkey-data
+      spec:
+        accessModes: [ReadWriteOnce]
+        resources:
+          requests:
+            storage: 512Mi
