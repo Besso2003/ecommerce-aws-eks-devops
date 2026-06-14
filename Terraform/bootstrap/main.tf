@@ -1,4 +1,12 @@
 terraform {
+  backend "s3" {
+    bucket         = "ecommerce-tf-state-bassant"
+    key            = "bootstrap/terraform.tfstate"
+    region         = "eu-north-1"
+    dynamodb_table = "ecommerce-terraform-locks-bassant"
+    encrypt        = true
+  }
+
   required_providers {
     aws = {
       source  = "hashicorp/aws"
@@ -9,17 +17,14 @@ terraform {
 
 # Configure the AWS Provider
 provider "aws" {
-  region = var.aws_region
+  region  = var.aws_region
   profile = var.aws_profile
 }
 
-# Configure the S3 backend for Terraform state
 resource "aws_s3_bucket" "terraform_state" {
   bucket = var.state_bucket_name
-
 }
 
-# Configure the versioning for the S3 bucket
 resource "aws_s3_bucket_versioning" "terraform_state" {
   bucket = aws_s3_bucket.terraform_state.id
 
@@ -28,30 +33,32 @@ resource "aws_s3_bucket_versioning" "terraform_state" {
   }
 }
 
-# Configure the encryption for the S3 bucket
 resource "aws_s3_bucket_server_side_encryption_configuration" "terraform_state" {
   bucket = aws_s3_bucket.terraform_state.id
 
   rule {
     apply_server_side_encryption_by_default {
-      sse_algorithm     = "AES256"
+      sse_algorithm = "AES256"
     }
   }
 }
 
-# Configure the DynamoDB table for Terraform state locking
+resource "aws_s3_bucket_public_access_block" "terraform_state" {
+  bucket = aws_s3_bucket.terraform_state.id
+
+  block_public_acls       = true
+  block_public_policy     = true
+  ignore_public_acls      = true
+  restrict_public_buckets = true
+}
+
 resource "aws_dynamodb_table" "terraform_locks" {
-  name           = var.dynamodb_table_name
-  billing_mode   = "PAY_PER_REQUEST"
-  hash_key       = "LockID"
+  name         = var.dynamodb_table_name
+  billing_mode = "PAY_PER_REQUEST"
+  hash_key     = "LockID"
 
   attribute {
     name = "LockID"
     type = "S"
   }
-
-#   tags = {
-#     Name        = "dynamodb-table-1"
-#     Environment = "production"
-#   }
 }

@@ -13,5 +13,4 @@
 
 # Terraform
 *.tfstate.*
-*.tfvars
 k8s/**/secret.yaml
