@@ -27,3 +27,28 @@ variable "az_count" {
   type    = number
   default = 2
 }
+
+variable "kubernetes_version" {
+  type    = string
+  default = "1.35"
+}
+
+variable "node_instance_type" {
+  type    = string
+  default = "m7i-flex.large"
+}
+
+variable "node_desired_size" {
+  type    = number
+  default = 2
+}
+
+variable "node_min_size" {
+  type    = number
+  default = 2
+}
+
+variable "node_max_size" {
+  type    = number
+  default = 4
+}

@@ -32,3 +32,12 @@ module "vpc" {
   az_count           = var.az_count
   single_nat_gateway = true   # staging also uses single NAT
 }
+
+module "iam" {
+  source = "../../modules/iam"
+
+  project_name        = var.project_name
+  environment         = var.environment
+  tags                = local.common_tags
+  eks_oidc_issuer_url = module.eks.oidc_issuer_url
+}

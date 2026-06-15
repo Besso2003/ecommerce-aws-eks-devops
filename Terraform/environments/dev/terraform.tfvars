@@ -1,6 +1,11 @@
-aws_region   = "eu-north-1"
-aws_profile  = "bassant"
-project_name = "ecommerce"
-environment  = "dev"
-vpc_cidr     = "10.0.0.0/16"
-az_count     = 2
+aws_region         = "eu-north-1"
+aws_profile        = "bassant"
+project_name       = "ecommerce"
+environment        = "dev"
+vpc_cidr           = "10.0.0.0/16"
+az_count           = 2
+kubernetes_version = "1.35"
+node_instance_type = "m7i-flex.large"
+node_desired_size  = 2
+node_min_size      = 2
+node_max_size      = 4
