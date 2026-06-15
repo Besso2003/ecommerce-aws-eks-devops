@@ -1,12 +1,4 @@
 terraform {
-  backend "s3" {
-    bucket         = "ecommerce-tf-state-bassant"
-    key            = "bootstrap/terraform.tfstate"
-    region         = "eu-north-1"
-    dynamodb_table = "ecommerce-terraform-locks-bassant"
-    encrypt        = true
-  }
-
   required_providers {
     aws = {
       source  = "hashicorp/aws"
