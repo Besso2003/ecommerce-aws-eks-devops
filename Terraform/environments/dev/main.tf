@@ -18,7 +18,6 @@ locals {
   common_tags = {
     Project     = var.project_name
     Environment = var.environment
-    ManagedBy   = "terraform"
   }
 }
 
@@ -30,14 +29,30 @@ module "vpc" {
   tags               = local.common_tags
   vpc_cidr           = var.vpc_cidr
   az_count           = var.az_count
-  single_nat_gateway = true   # single NAT for dev
+  single_nat_gateway = true
 }
 
 module "iam" {
   source = "../../modules/iam"
 
-  project_name        = var.project_name
-  environment         = var.environment
-  tags                = local.common_tags
-  eks_oidc_issuer_url = module.eks.oidc_issuer_url  # ← comes from EKS module
+  project_name = var.project_name
+  environment  = var.environment
+  tags         = local.common_tags
+}
+
+module "eks" {
+  source = "../../modules/eks"
+
+  project_name         = var.project_name
+  environment          = var.environment
+  tags                 = local.common_tags
+  kubernetes_version   = var.kubernetes_version
+  eks_cluster_role_arn = module.iam.eks_cluster_role_arn
+  eks_node_role_arn    = module.iam.eks_node_role_arn
+  public_subnet_ids    = module.vpc.public_subnet_ids
+  private_subnet_ids   = module.vpc.private_subnet_ids
+  node_instance_type   = var.node_instance_type
+  node_desired_size    = var.node_desired_size
+  node_min_size        = var.node_min_size
+  node_max_size        = var.node_max_size
 }
