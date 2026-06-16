@@ -30,6 +30,7 @@ module "vpc" {
   vpc_cidr           = var.vpc_cidr
   az_count           = var.az_count
   single_nat_gateway = true
+  aws_region = var.aws_region
 }
 
 module "iam" {
@@ -55,4 +56,13 @@ module "eks" {
   node_desired_size    = var.node_desired_size
   node_min_size        = var.node_min_size
   node_max_size        = var.node_max_size
+}
+
+module "ecr" {
+  source = "../../modules/ecr"
+
+  project_name = var.project_name
+  environment  = var.environment
+  tags         = local.common_tags
+  aws_region   = var.aws_region
 }

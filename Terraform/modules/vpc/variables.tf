@@ -36,3 +36,8 @@ variable "tags" {
   type        = map(string)
   default     = {}
 }
+
+variable "aws_region" {
+  description = "AWS region"
+  type        = string
+}

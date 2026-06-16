@@ -140,3 +140,15 @@ resource "aws_default_security_group" "default" {
     Name = "${local.name_prefix}-default-sg-DO-NOT-USE"
   })
 }
+
+# S3 Gateway Endpoint — FREE, reduces NAT costs for ECR image pulls
+resource "aws_vpc_endpoint" "s3" {
+  vpc_id       = aws_vpc.main.id
+  service_name = "com.amazonaws.${var.aws_region}.s3"
+  vpc_endpoint_type = "Gateway"
+  route_table_ids = aws_route_table.public[*].id
+
+  tags = merge(var.tags, {
+    Name = "${local.name_prefix}-s3-endpoint"
+  })
+}
