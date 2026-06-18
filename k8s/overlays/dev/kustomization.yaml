@@ -4,6 +4,7 @@ namespace: dev
 resources:
   - namespace.yaml
   - ingress.yaml
+  - ../../base/storage
   - ../../base/network-policies
   - ../../base/product-catalog
   - ../../base/ad-service

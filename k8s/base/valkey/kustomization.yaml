@@ -5,3 +5,4 @@ resources:
   - service-headless.yaml
   - serviceaccount.yaml
   - pdb.yaml
+  - service.yaml

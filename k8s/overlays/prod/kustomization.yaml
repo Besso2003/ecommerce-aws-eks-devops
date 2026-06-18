@@ -5,6 +5,7 @@ namespace: prod
 
 resources:
   - namespace.yaml
+  - ../../base/storage
   - ../../base/network-policies
   - ../../base/product-catalog
   - ../../base/ad-service

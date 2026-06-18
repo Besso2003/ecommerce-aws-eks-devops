@@ -6,5 +6,6 @@ resources:
   - service.yaml
   - configmap.yaml
   - hpa.yaml
-  - sealed-secret.yaml
+  # - sealed-secret.yaml
+  - secret.yaml
   - pdb.yaml
