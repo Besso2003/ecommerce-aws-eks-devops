@@ -55,7 +55,7 @@ variable "node_max_size" {
 
 variable "rds_instance_class" {
   type    = string
-  default = "db.t3.micro"
+  default = "db.t4g.micro"
 }
 
 variable "db_password" {
