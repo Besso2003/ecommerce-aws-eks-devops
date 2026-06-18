@@ -16,7 +16,7 @@ resource "aws_eks_cluster" "main" {
   name = "${local.name_prefix}-cluster"
 
   access_config {
-    authentication_mode = "API"
+    authentication_mode                         = "API"
     bootstrap_cluster_creator_admin_permissions = true
   }
 
@@ -24,10 +24,10 @@ resource "aws_eks_cluster" "main" {
   version  = var.kubernetes_version
 
   vpc_config {
-    subnet_ids = concat(var.public_subnet_ids, var.private_subnet_ids)
+    subnet_ids              = concat(var.public_subnet_ids, var.private_subnet_ids)
     endpoint_private_access = true
-    endpoint_public_access = true
-    security_group_ids = []
+    endpoint_public_access  = true
+    security_group_ids      = []
   }
 
   tags = var.tags
@@ -41,10 +41,10 @@ resource "aws_eks_node_group" "main" {
   node_group_name = "${local.name_prefix}-nodes"
   node_role_arn   = var.eks_node_role_arn
   subnet_ids      = var.private_subnet_ids
-  ami_type = "AL2023_x86_64_STANDARD"
-  capacity_type = "ON_DEMAND"
-  instance_types = [ var.node_instance_type ]
-  disk_size = 20
+  ami_type        = "AL2023_x86_64_STANDARD"
+  capacity_type   = "ON_DEMAND"
+  instance_types  = [var.node_instance_type]
+  disk_size       = 20
 
   scaling_config {
     desired_size = var.node_desired_size
@@ -66,34 +66,42 @@ resource "aws_eks_addon" "coredns" {
   cluster_name = aws_eks_cluster.main.name
   addon_name   = "coredns"
 
-  depends_on = [ aws_eks_node_group.main ]
+  depends_on = [aws_eks_node_group.main]
 }
 
 resource "aws_eks_addon" "kube_proxy" {
   cluster_name = aws_eks_cluster.main.name
   addon_name   = "kube-proxy"
 
-  depends_on = [ aws_eks_node_group.main ]
+  depends_on = [aws_eks_node_group.main]
 }
 
 resource "aws_eks_addon" "vpc_cni" {
   cluster_name = aws_eks_cluster.main.name
   addon_name   = "vpc-cni"
 
-  depends_on = [ aws_eks_node_group.main ]
+  depends_on = [aws_eks_node_group.main]
 }
 
 resource "aws_eks_addon" "pod_identity" {
   cluster_name = aws_eks_cluster.main.name
   addon_name   = "eks-pod-identity-agent"
 
-  depends_on = [ aws_eks_node_group.main ]
+  depends_on = [aws_eks_node_group.main]
 }
 
-##############################################################################
-# OIDC Provider + EBS CSI Role — lives here because it needs cluster data
-##############################################################################
+resource "aws_eks_addon" "ebs_csi" {
+  cluster_name             = aws_eks_cluster.main.name
+  addon_name               = "aws-ebs-csi-driver"
+  service_account_role_arn = aws_iam_role.ebs_csi.arn
 
+  depends_on = [aws_eks_node_group.main]
+
+  tags = var.tags
+}
+
+
+# OIDC Provider + EBS CSI Role — lives here because it needs cluster data
 data "tls_certificate" "eks" {
   url = aws_eks_cluster.main.identity[0].oidc[0].issuer
 }

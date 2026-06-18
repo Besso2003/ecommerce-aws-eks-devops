@@ -15,7 +15,7 @@ data "aws_caller_identity" "current" {}
 
 # ECR Repositories — one per custom microservice
 resource "aws_ecr_repository" "repos" {
-  for_each = toset(var.repositories)
+  for_each             = toset(var.repositories)
   name                 = "${local.name_prefix}/${each.value}"
   image_tag_mutability = "MUTABLE"
 
@@ -30,7 +30,7 @@ resource "aws_ecr_repository" "repos" {
 
 # Lifecycle Policy — keep costs low, clean up old images automatically
 resource "aws_ecr_lifecycle_policy" "repos" {
-  for_each = aws_ecr_repository.repos
+  for_each   = aws_ecr_repository.repos
   repository = each.value.name
 
   policy = <<EOF

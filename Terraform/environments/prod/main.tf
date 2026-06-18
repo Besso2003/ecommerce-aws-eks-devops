@@ -70,16 +70,15 @@ module "ecr" {
 module "rds" {
   source = "../../modules/rds"
 
-  project_name         = var.project_name
-  environment          = var.environment
-  tags                 = local.common_tags
-  vpc_id               = module.vpc.vpc_id
-  private_subnet_ids   = module.vpc.private_subnet_ids
-  private_subnet_cidrs = module.vpc.private_subnet_cidrs
-  instance_class       = var.rds_instance_class
-  db_password          = var.db_password
-  multi_az             = true           # HA for prod
-  deletion_protection  = true           # prevent accidents in prod
-  skip_final_snapshot  = false          # keep snapshot on destroy
-  backup_retention_days = 7
+  project_name           = var.project_name
+  environment            = var.environment
+  tags                   = local.common_tags
+  vpc_id                 = module.vpc.vpc_id
+  private_subnet_ids     = module.vpc.private_subnet_ids
+  private_subnet_cidrs   = module.vpc.private_subnet_cidrs
+  instance_class         = var.rds_instance_class
+  multi_az               = true
+  deletion_protection    = true
+  skip_final_snapshot    = false
+  backup_retention_days  = 7
 }

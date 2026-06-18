@@ -59,12 +59,6 @@ variable "db_username" {
   default     = "otel"
 }
 
-variable "db_password" {
-  description = "Database master password"
-  type        = string
-  sensitive   = true
-}
-
 variable "multi_az" {
   description = "Enable Multi-AZ for high availability — true for prod"
   type        = bool
