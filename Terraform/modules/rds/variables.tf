@@ -24,9 +24,8 @@ variable "private_subnet_cidrs" {
 }
 
 variable "postgres_version" {
-  description = "PostgreSQL engine version"
-  type        = string
-  default     = "17.2"
+  type    = string
+  default = "17.5"
 }
 
 variable "instance_class" {
@@ -68,7 +67,7 @@ variable "multi_az" {
 variable "backup_retention_days" {
   description = "Number of days to retain backups"
   type        = number
-  default     = 7
+  default     = 0
 }
 
 variable "deletion_protection" {

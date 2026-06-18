@@ -3,15 +3,15 @@ kind: Deployment
 metadata:
   name: shipping
 spec:
-  replicas: 3
+  replicas: 2
   template:
     spec:
       containers:
         - name: shipping
           resources:
             requests:
-              cpu: 400m
-              memory: 256Mi
+              cpu: 150m
+              memory: 128Mi
             limits:
-              cpu: 500m
-              memory: 512Mi
+              cpu: 300m
+              memory: 256Mi

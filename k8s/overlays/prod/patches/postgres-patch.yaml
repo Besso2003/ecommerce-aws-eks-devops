@@ -1,17 +1,17 @@
 apiVersion: apps/v1
-kind: Deployment
+kind: StatefulSet
 metadata:
   name: postgres
 spec:
-  replicas: 3
+  replicas: 0
   template:
     spec:
       containers:
         - name: postgres
           resources:
             requests:
-              cpu: 400m
-              memory: 256Mi
+              cpu: 200m
+              memory: 512Mi
             limits:
               cpu: 500m
-              memory: 512Mi
+              memory: 1Gi

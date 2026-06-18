@@ -1,17 +1,17 @@
 apiVersion: apps/v1
-kind: Deployment
+kind: StatefulSet
 metadata:
   name: kafka
 spec:
-  replicas: 3
+  replicas: 1
   template:
     spec:
       containers:
         - name: kafka
           resources:
             requests:
-              cpu: 400m
-              memory: 256Mi
+              cpu: 300m
+              memory: 768Mi
             limits:
-              cpu: 500m
-              memory: 512Mi
+              cpu: 600m
+              memory: 1.5Gi
