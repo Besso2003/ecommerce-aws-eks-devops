@@ -32,3 +32,8 @@ output "availability_zones" {
   description = "List of AZs used"
   value       = local.azs
 }
+
+output "private_subnet_cidrs" {
+  description = "List of private subnet CIDR blocks"
+  value       = aws_subnet.private[*].cidr_block
+}

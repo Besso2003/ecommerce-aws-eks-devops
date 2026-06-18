@@ -52,3 +52,13 @@ variable "node_max_size" {
   type    = number
   default = 6
 }
+
+variable "rds_instance_class" {
+  type    = string
+  default = "db.t3.micro"
+}
+
+variable "db_password" {
+  type      = string
+  sensitive = true
+}

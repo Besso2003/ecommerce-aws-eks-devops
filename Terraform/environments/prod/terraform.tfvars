@@ -9,3 +9,4 @@ node_instance_type = "m7i-flex.large"
 node_desired_size  = 3
 node_min_size      = 3
 node_max_size      = 6
+rds_instance_class = "db.t4g.micro"
