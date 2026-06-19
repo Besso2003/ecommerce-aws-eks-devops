@@ -1,11 +1,11 @@
 aws_region         = "eu-north-1"
 aws_profile        = "bassant"
 project_name       = "ecommerce"
-environment        = "staging"
-vpc_cidr           = "10.1.0.0/16"
+environment        = "platform"
+vpc_cidr           = "10.3.0.0/16"
 az_count           = 2
 kubernetes_version = "1.35"
 node_instance_type = "m7i-flex.large"
-node_desired_size  = 3
-node_min_size      = 3
-node_max_size      = 5
+node_desired_size  = 1
+node_min_size      = 1
+node_max_size      = 2

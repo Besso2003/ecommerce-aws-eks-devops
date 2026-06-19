@@ -15,12 +15,12 @@ variable "project_name" {
 
 variable "environment" {
   type    = string
-  default = "staging"
+  default = "platform"
 }
 
 variable "vpc_cidr" {
   type    = string
-  default = "10.1.0.0/16"
+  default = "10.3.0.0/16"
 }
 
 variable "az_count" {
@@ -40,15 +40,15 @@ variable "node_instance_type" {
 
 variable "node_desired_size" {
   type    = number
-  default = 2
+  default = 1
 }
 
 variable "node_min_size" {
   type    = number
-  default = 2
+  default = 1
 }
 
 variable "node_max_size" {
   type    = number
-  default = 4
+  default = 2
 }
