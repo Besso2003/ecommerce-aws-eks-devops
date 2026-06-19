@@ -22,8 +22,8 @@ spec:
           envFrom:
             - configMapRef:
                 name: accounting-config
-            - secretRef:
-                name: accounting-secret
+            # - secretRef:
+            #     name: accounting-secret
           resources:
             requests:
               cpu: 100m

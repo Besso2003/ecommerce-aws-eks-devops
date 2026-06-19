@@ -4,6 +4,6 @@ resources:
   - serviceaccount.yaml
   - deployment.yaml
   - configmap.yaml
-  - secret.yaml
+  # - secret.yaml
   # - sealed-secret.yaml
   - pdb.yaml

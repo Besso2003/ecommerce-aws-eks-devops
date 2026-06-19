@@ -5,6 +5,7 @@ namespace: prod
 
 resources:
   - namespace.yaml
+  - external-secrets
   - ../../base/storage
   - ../../base/network-policies
   - ../../base/product-catalog
@@ -26,10 +27,13 @@ resources:
   - ../../base/load-generator
   - ../../base/valkey
   - ../../base/kafka
-  - ../../base/postgres
+  # - ../../base/postgres
   - ../../base/frontend
   - ../../base/frontend-proxy
   - ../../base/llm
+  # - external-secrets/secretstore.yaml
+  # - external-secrets/postgres-external-secret.yaml
+  # - external-secrets/postgres-service.yaml
 patches:
   - path: patches/product-catalog-patch.yaml
     target:
@@ -107,10 +111,10 @@ patches:
     target:
       kind: Deployment
       name: kafka
-  - path: patches/postgres-patch.yaml
-    target:
-      kind: Deployment
-      name: postgres
+  # - path: patches/postgres-patch.yaml
+  #   target:
+  #     kind: Deployment
+  #     name: postgres
   - path: patches/frontend-patch.yaml
     target:
       kind: Deployment

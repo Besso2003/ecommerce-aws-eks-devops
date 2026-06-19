@@ -25,3 +25,8 @@ output "ebs_csi_role_arn" {
 output "cluster_version" {
   value = aws_eks_cluster.main.version
 }
+
+output "external_secrets_role_arn" {
+  description = "IAM role ARN for External Secrets Operator"
+  value       = aws_iam_role.external_secrets.arn
+}

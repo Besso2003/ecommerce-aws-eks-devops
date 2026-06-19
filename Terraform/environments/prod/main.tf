@@ -56,6 +56,7 @@ module "eks" {
   node_desired_size    = var.node_desired_size
   node_min_size        = var.node_min_size
   node_max_size        = var.node_max_size
+  aws_region           = var.aws_region
 }
 
 module "ecr" {
