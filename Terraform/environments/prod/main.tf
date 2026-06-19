@@ -129,6 +129,11 @@ resource "helm_release" "external_secrets" {
   namespace        = kubernetes_namespace.external_secrets.metadata[0].name
   create_namespace = false
 
+  set {
+    name  = "serviceAccount.annotations.eks\\.amazonaws\\.com/role-arn"
+    value = module.eks.external_secrets_role_arn
+  }
+
   depends_on = [kubernetes_namespace.external_secrets]
 }
 
