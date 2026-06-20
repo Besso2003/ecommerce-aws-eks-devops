@@ -173,6 +173,7 @@ If a pod is deleted and recreated, it automatically reattaches to its existing P
 ---
 
 ## Services
+![Ecommerce microservices architecture](../docs/images/Ecommerce-microservices-arch.png)
 
 ### Stateless Services (Deployment + Service + ConfigMap + HPA + PDB)
 
