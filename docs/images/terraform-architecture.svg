@@ -1,0 +1,66 @@
+<svg width="680" height="620" viewBox="0 0 680 620" xmlns="http://www.w3.org/2000/svg" role="img">
+<title>Terraform module and environment architecture</title>
+<desc>Five reusable modules - vpc, iam, eks, ecr, rds - are composed by three environments: platform, dev, and prod, each producing its own EKS cluster.</desc>
+<defs>
+<marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M2 1L8 5L2 9" fill="none" stroke="#5F5E5A" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></marker>
+</defs>
+<rect width="680" height="620" fill="#ffffff"/>
+
+<text x="40" y="30" font-family="Arial, sans-serif" font-size="12" fill="#5F5E5A">Modules</text>
+
+<rect x="40" y="44" width="100" height="44" rx="8" fill="#F1EFE8" stroke="#5F5E5A" stroke-width="0.5"/>
+<text x="90" y="66" text-anchor="middle" dominant-baseline="central" font-family="Arial, sans-serif" font-size="14" font-weight="500" fill="#2C2C2A">vpc</text>
+
+<rect x="160" y="44" width="100" height="44" rx="8" fill="#F1EFE8" stroke="#5F5E5A" stroke-width="0.5"/>
+<text x="210" y="66" text-anchor="middle" dominant-baseline="central" font-family="Arial, sans-serif" font-size="14" font-weight="500" fill="#2C2C2A">iam</text>
+
+<rect x="290" y="44" width="100" height="44" rx="8" fill="#E1F5EE" stroke="#0F6E56" stroke-width="0.5"/>
+<text x="340" y="66" text-anchor="middle" dominant-baseline="central" font-family="Arial, sans-serif" font-size="14" font-weight="500" fill="#04342C">eks</text>
+
+<rect x="420" y="44" width="100" height="44" rx="8" fill="#F1EFE8" stroke="#5F5E5A" stroke-width="0.5"/>
+<text x="470" y="66" text-anchor="middle" dominant-baseline="central" font-family="Arial, sans-serif" font-size="14" font-weight="500" fill="#2C2C2A">ecr</text>
+
+<rect x="540" y="44" width="100" height="44" rx="8" fill="#FAECE7" stroke="#993C1D" stroke-width="0.5"/>
+<text x="590" y="66" text-anchor="middle" dominant-baseline="central" font-family="Arial, sans-serif" font-size="14" font-weight="500" fill="#4A1B0C">rds</text>
+<text x="590" y="100" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" fill="#5F5E5A">prod only</text>
+
+<path d="M90 88 L90 120 L320 120 L320 144" fill="none" stroke="#5F5E5A" stroke-width="0.5" marker-end="url(#arrow)"/>
+<path d="M210 88 L210 130 L340 130 L340 144" fill="none" stroke="#5F5E5A" stroke-width="0.5" marker-end="url(#arrow)"/>
+<text x="320" y="112" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" fill="#5F5E5A">vpc + iam outputs</text>
+
+<line x1="90" y1="88" x2="90" y2="200" stroke="#5F5E5A" stroke-width="0.5" stroke-dasharray="3 3"/>
+<path d="M90 200 L590 200 L590 144" fill="none" stroke="#5F5E5A" stroke-width="0.5" stroke-dasharray="3 3" marker-end="url(#arrow)"/>
+<text x="340" y="216" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" fill="#5F5E5A">vpc outputs (prod only)</text>
+
+<rect x="20" y="250" width="640" height="340" rx="16" fill="none" stroke="#888780" stroke-width="0.5" stroke-dasharray="4 4"/>
+<text x="40" y="275" font-family="Arial, sans-serif" font-size="12" fill="#5F5E5A">Environments (each composes the modules above)</text>
+
+<rect x="40" y="295" width="180" height="120" rx="14" fill="#EEEDFE" stroke="#534AB7" stroke-width="0.5"/>
+<text x="130" y="320" text-anchor="middle" dominant-baseline="central" font-family="Arial, sans-serif" font-size="14" font-weight="500" fill="#26215C">platform</text>
+<text x="130" y="342" text-anchor="middle" dominant-baseline="central" font-family="Arial, sans-serif" font-size="12" fill="#3C3489">vpc + eks</text>
+<text x="130" y="360" text-anchor="middle" dominant-baseline="central" font-family="Arial, sans-serif" font-size="12" fill="#3C3489">+ ArgoCD helm_release</text>
+<text x="130" y="384" text-anchor="middle" dominant-baseline="central" font-family="Arial, sans-serif" font-size="12" fill="#3C3489">hub cluster</text>
+
+<rect x="250" y="295" width="180" height="120" rx="14" fill="#E1F5EE" stroke="#0F6E56" stroke-width="0.5"/>
+<text x="340" y="320" text-anchor="middle" dominant-baseline="central" font-family="Arial, sans-serif" font-size="14" font-weight="500" fill="#04342C">dev</text>
+<text x="340" y="342" text-anchor="middle" dominant-baseline="central" font-family="Arial, sans-serif" font-size="12" fill="#085041">vpc + iam + eks + ecr</text>
+<text x="340" y="360" text-anchor="middle" dominant-baseline="central" font-family="Arial, sans-serif" font-size="12" fill="#085041">postgres on EBS</text>
+<text x="340" y="384" text-anchor="middle" dominant-baseline="central" font-family="Arial, sans-serif" font-size="12" fill="#085041">registers with hub</text>
+
+<rect x="460" y="295" width="180" height="120" rx="14" fill="#FAECE7" stroke="#993C1D" stroke-width="0.5"/>
+<text x="550" y="320" text-anchor="middle" dominant-baseline="central" font-family="Arial, sans-serif" font-size="14" font-weight="500" fill="#4A1B0C">prod</text>
+<text x="550" y="342" text-anchor="middle" dominant-baseline="central" font-family="Arial, sans-serif" font-size="12" fill="#712B13">vpc + iam + eks + ecr + rds</text>
+<text x="550" y="360" text-anchor="middle" dominant-baseline="central" font-family="Arial, sans-serif" font-size="12" fill="#712B13">External Secrets Operator</text>
+<text x="550" y="384" text-anchor="middle" dominant-baseline="central" font-family="Arial, sans-serif" font-size="12" fill="#712B13">registers with hub</text>
+
+<path d="M130 415 L130 450" fill="none" stroke="#5F5E5A" stroke-width="0.5" marker-end="url(#arrow)"/>
+<path d="M340 415 L220 450" fill="none" stroke="#5F5E5A" stroke-width="0.5" stroke-dasharray="3 3" marker-end="url(#arrow)"/>
+<path d="M550 415 L240 450" fill="none" stroke="#5F5E5A" stroke-width="0.5" stroke-dasharray="3 3" marker-end="url(#arrow)"/>
+<text x="340" y="440" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" fill="#5F5E5A">registration secret (cross-cluster)</text>
+
+<rect x="60" y="450" width="540" height="44" rx="8" fill="#F1EFE8" stroke="#5F5E5A" stroke-width="0.5"/>
+<text x="330" y="472" text-anchor="middle" dominant-baseline="central" font-family="Arial, sans-serif" font-size="14" font-weight="500" fill="#2C2C2A">platform cluster: argocd namespace</text>
+
+<text x="40" y="530" font-family="Arial, sans-serif" font-size="12" fill="#5F5E5A">Apply order: platform first, then dev and prod independently</text>
+<text x="40" y="550" font-family="Arial, sans-serif" font-size="12" fill="#5F5E5A">Each environment has its own S3-backed state file (separate key per env)</text>
+</svg>
