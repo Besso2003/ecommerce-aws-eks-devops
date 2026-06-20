@@ -4,15 +4,7 @@ This folder defines how ArgoCD deploys and manages the `dev` and `prod` Kubernet
 
 ## Architecture
 
-```
-platform cluster (hub)
-  -- runs ArgoCD only
-  -- registers dev + prod as remote destination clusters
-
-dev cluster (spoke)         prod cluster (spoke)
-  -- workloads only           -- workloads only
-  -- no ArgoCD installed       -- no ArgoCD installed
-```
+![ArgoCD hub-and-spoke architecture](../docs/images/argocd-architecture.svg)
 
 ArgoCD runs in exactly one place — the `platform` cluster — and is given remote access to deploy into `dev` and `prod`. This mirrors how companies running multiple clusters typically operate ArgoCD (one control plane, many managed clusters) rather than installing a separate ArgoCD per cluster.
 
@@ -44,6 +36,10 @@ After `root-app.yaml` is applied, every other Application is picked up automatic
 aws eks update-kubeconfig --name ecommerce-platform-cluster --region eu-north-1
 kubectl apply -f argocd/root-app.yaml
 ```
+
+## Proof of Working Sync
+
+![Both environments registered as clusters in ArgoCD](../docs/images/argocd-clusters.png)
 
 ## Known Limitations / Tradeoffs
 
