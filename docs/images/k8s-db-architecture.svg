@@ -1,0 +1,51 @@
+<svg width="680" height="480" viewBox="0 0 680 480" xmlns="http://www.w3.org/2000/svg" role="img">
+<title>Dev versus prod postgres architecture in Kubernetes</title>
+<desc>Every service connects to a service named postgres on port 5432 in both environments. In dev this resolves to a StatefulSet pod backed by EBS storage inside the cluster. In prod this resolves via an ExternalName service to a managed Amazon RDS PostgreSQL instance outside the cluster, with credentials synced in by External Secrets Operator from AWS Secrets Manager.</desc>
+<defs>
+<marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M2 1L8 5L2 9" fill="none" stroke="#5F5E5A" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></marker>
+</defs>
+<rect width="680" height="480" fill="#ffffff"/>
+
+<rect x="40" y="30" width="600" height="50" rx="10" fill="#F1EFE8" stroke="#5F5E5A" stroke-width="0.5"/>
+<text x="340" y="55" text-anchor="middle" dominant-baseline="central" font-family="Arial, sans-serif" font-size="14" font-weight="500" fill="#2C2C2A">Every service connects to: postgres:5432</text>
+
+<path d="M170 80 L170 130" fill="none" stroke="#5F5E5A" stroke-width="0.5" marker-end="url(#arrow)"/>
+<path d="M510 80 L510 130" fill="none" stroke="#5F5E5A" stroke-width="0.5" marker-end="url(#arrow)"/>
+
+<rect x="30" y="130" width="290" height="320" rx="16" fill="#E1F5EE" stroke="#0F6E56" stroke-width="0.5"/>
+<text x="175" y="158" text-anchor="middle" dominant-baseline="central" font-family="Arial, sans-serif" font-size="14" font-weight="500" fill="#04342C">dev cluster</text>
+
+<rect x="60" y="184" width="230" height="60" rx="10" fill="#9FE1CB" stroke="#0F6E56" stroke-width="0.5"/>
+<text x="175" y="208" text-anchor="middle" dominant-baseline="central" font-family="Arial, sans-serif" font-size="12" fill="#04342C">Service: postgres</text>
+<text x="175" y="226" text-anchor="middle" dominant-baseline="central" font-family="Arial, sans-serif" font-size="12" fill="#04342C">type ClusterIP</text>
+
+<path d="M175 244 L175 274" fill="none" stroke="#0F6E56" stroke-width="0.5" marker-end="url(#arrow)"/>
+
+<rect x="60" y="274" width="230" height="70" rx="10" fill="#9FE1CB" stroke="#0F6E56" stroke-width="0.5"/>
+<text x="175" y="298" text-anchor="middle" dominant-baseline="central" font-family="Arial, sans-serif" font-size="12" fill="#04342C">postgres-0</text>
+<text x="175" y="316" text-anchor="middle" dominant-baseline="central" font-family="Arial, sans-serif" font-size="12" fill="#04342C">StatefulSet pod</text>
+
+<path d="M175 344 L175 374" fill="none" stroke="#0F6E56" stroke-width="0.5" marker-end="url(#arrow)"/>
+
+<rect x="60" y="374" width="230" height="56" rx="10" fill="#9FE1CB" stroke="#0F6E56" stroke-width="0.5"/>
+<text x="175" y="402" text-anchor="middle" dominant-baseline="central" font-family="Arial, sans-serif" font-size="12" fill="#04342C">EBS volume (PVC)</text>
+
+<rect x="360" y="130" width="290" height="320" rx="16" fill="#FAECE7" stroke="#993C1D" stroke-width="0.5"/>
+<text x="505" y="158" text-anchor="middle" dominant-baseline="central" font-family="Arial, sans-serif" font-size="14" font-weight="500" fill="#4A1B0C">prod cluster</text>
+
+<rect x="390" y="184" width="230" height="60" rx="10" fill="#F5C4B3" stroke="#993C1D" stroke-width="0.5"/>
+<text x="505" y="208" text-anchor="middle" dominant-baseline="central" font-family="Arial, sans-serif" font-size="12" fill="#4A1B0C">Service: postgres</text>
+<text x="505" y="226" text-anchor="middle" dominant-baseline="central" font-family="Arial, sans-serif" font-size="12" fill="#4A1B0C">type ExternalName</text>
+
+<path d="M505 244 L505 274" fill="none" stroke="#993C1D" stroke-width="0.5" marker-end="url(#arrow)"/>
+
+<rect x="390" y="274" width="230" height="60" rx="10" fill="#F5C4B3" stroke="#993C1D" stroke-width="0.5"/>
+<text x="505" y="298" text-anchor="middle" dominant-baseline="central" font-family="Arial, sans-serif" font-size="12" fill="#4A1B0C">Amazon RDS</text>
+<text x="505" y="316" text-anchor="middle" dominant-baseline="central" font-family="Arial, sans-serif" font-size="12" fill="#4A1B0C">PostgreSQL (outside cluster)</text>
+
+<path d="M505 334 Q 560 354 505 374" fill="none" stroke="#993C1D" stroke-width="0.5" marker-end="url(#arrow)"/>
+
+<rect x="390" y="374" width="230" height="56" rx="10" fill="#F5C4B3" stroke="#993C1D" stroke-width="0.5"/>
+<text x="505" y="394" text-anchor="middle" dominant-baseline="central" font-family="Arial, sans-serif" font-size="12" fill="#4A1B0C">credentials via</text>
+<text x="505" y="412" text-anchor="middle" dominant-baseline="central" font-family="Arial, sans-serif" font-size="12" fill="#4A1B0C">External Secrets Operator</text>
+</svg>
