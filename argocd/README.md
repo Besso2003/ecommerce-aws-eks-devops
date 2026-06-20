@@ -17,6 +17,7 @@ Each workload environment's Terraform (`terraform/environments/dev`, `terraform/
 - A Secret written directly into the **hub's** `argocd` namespace, labeled `argocd.argoproj.io/secret-type: cluster`, containing the cluster's endpoint, CA certificate, and the bearer token
 
 This means cluster registration is fully automated as part of `terraform apply` for each environment. No manual `argocd cluster add` commands are needed.
+![Dev and prod registered as destination clusters in ArgoCD](../docs/images/cluster-dev-setting.png)
 
 ## App of Apps Bootstrap
 
