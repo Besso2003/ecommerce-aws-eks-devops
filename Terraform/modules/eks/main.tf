@@ -95,25 +95,13 @@ resource "aws_eks_addon" "ebs_csi" {
   addon_name               = "aws-ebs-csi-driver"
   service_account_role_arn = aws_iam_role.ebs_csi.arn
 
-  depends_on = [aws_eks_node_group.main]
+  depends_on = [aws_eks_addon.pod_identity, aws_eks_pod_identity_association.ebs_csi]
 
   tags = var.tags
 }
 
 
-# OIDC Provider + EBS CSI Role — lives here because it needs cluster data
-data "tls_certificate" "eks" {
-  url = aws_eks_cluster.main.identity[0].oidc[0].issuer
-}
-
-resource "aws_iam_openid_connect_provider" "eks" {
-  client_id_list  = ["sts.amazonaws.com"]
-  thumbprint_list = [data.tls_certificate.eks.certificates[0].sha1_fingerprint]
-  url             = aws_eks_cluster.main.identity[0].oidc[0].issuer
-
-  tags = var.tags
-}
-
+# EBS CSI Role — Pod Identity
 resource "aws_iam_role" "ebs_csi" {
   name = "${local.name_prefix}-ebs-csi-role"
 
@@ -122,15 +110,9 @@ resource "aws_iam_role" "ebs_csi" {
     Statement = [{
       Effect = "Allow"
       Principal = {
-        Federated = aws_iam_openid_connect_provider.eks.arn
+        Service = "pods.eks.amazonaws.com"
       }
-      Action = "sts:AssumeRoleWithWebIdentity"
-      Condition = {
-        StringEquals = {
-          "${replace(aws_iam_openid_connect_provider.eks.url, "https://", "")}:aud" = "sts.amazonaws.com"
-          "${replace(aws_iam_openid_connect_provider.eks.url, "https://", "")}:sub" = "system:serviceaccount:kube-system:ebs-csi-controller-sa"
-        }
-      }
+      Action = ["sts:AssumeRole", "sts:TagSession"]
     }]
   })
 
@@ -142,8 +124,17 @@ resource "aws_iam_role_policy_attachment" "ebs_csi_policy" {
   policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonEBSCSIDriverPolicy"
 }
 
+resource "aws_eks_pod_identity_association" "ebs_csi" {
+  cluster_name    = aws_eks_cluster.main.name
+  namespace       = "kube-system"
+  service_account = "ebs-csi-controller-sa"
+  role_arn        = aws_iam_role.ebs_csi.arn
 
-# External Secrets Operator Role — IRSA
+  depends_on = [aws_eks_addon.pod_identity]
+}
+
+
+# External Secrets Operator Role — Pod Identity
 resource "aws_iam_role" "external_secrets" {
   name = "${local.name_prefix}-external-secrets-role"
 
@@ -152,15 +143,9 @@ resource "aws_iam_role" "external_secrets" {
     Statement = [{
       Effect = "Allow"
       Principal = {
-        Federated = aws_iam_openid_connect_provider.eks.arn
+        Service = "pods.eks.amazonaws.com"
       }
-      Action = "sts:AssumeRoleWithWebIdentity"
-      Condition = {
-        StringEquals = {
-          "${replace(aws_iam_openid_connect_provider.eks.url, "https://", "")}:aud" = "sts.amazonaws.com"
-          "${replace(aws_iam_openid_connect_provider.eks.url, "https://", "")}:sub" = "system:serviceaccount:external-secrets:external-secrets"
-        }
-      }
+      Action = ["sts:AssumeRole", "sts:TagSession"]
     }]
   })
 
@@ -188,4 +173,13 @@ resource "aws_iam_policy" "external_secrets" {
 resource "aws_iam_role_policy_attachment" "external_secrets" {
   role       = aws_iam_role.external_secrets.name
   policy_arn = aws_iam_policy.external_secrets.arn
+}
+
+resource "aws_eks_pod_identity_association" "external_secrets" {
+  cluster_name    = aws_eks_cluster.main.name
+  namespace       = "external-secrets"
+  service_account = "external-secrets"
+  role_arn        = aws_iam_role.external_secrets.arn
+
+  depends_on = [aws_eks_addon.pod_identity]
 }
