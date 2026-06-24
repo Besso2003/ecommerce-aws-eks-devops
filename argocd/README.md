@@ -40,7 +40,7 @@ kubectl apply -f argocd/root-app.yaml
 
 ## Proof of Working Sync
 
-![Both environments registered as clusters in ArgoCD](../docs/images/argocd-clusters.png)
+![Both environments registered as clusters in ArgoCD](../docs/images/argocd-clusters-all.png)
 
 ## Known Limitations / Tradeoffs
 
