@@ -12,8 +12,9 @@ Terraform/
 │   ├── vpc/              VPC, subnets, NAT, IGW, S3 gateway endpoint
 │   ├── iam/              EKS cluster role + node role (no OIDC, avoids
 │   │                      a circular dependency with the eks module)
-│   ├── eks/              Cluster, node group, addons, OIDC provider,
-│   │                      EBS CSI role, External Secrets IAM role
+│   ├── eks/              Cluster, node group, addons, Pod Identity
+│   │                      Associations, EBS CSI role, External Secrets
+│   │                      IAM role
 │   ├── ecr/              19 repositories with lifecycle policies
 │   └── rds/              PostgreSQL instance, Secrets Manager secret
 │                          (prod only)
@@ -34,13 +35,118 @@ Terraform/
 vpc   -- no dependencies
 iam   -- no dependencies
 eks   -- needs vpc + iam outputs
-         creates its own OIDC provider and EBS CSI role internally
-         to avoid a circular dependency between eks and iam
+         creates its own Pod Identity Associations and EBS CSI role
+         internally to avoid a circular dependency between eks and iam
 ecr   -- no dependencies
 rds   -- needs vpc outputs (prod only)
 ```
 
 Each environment also creates an `argocd-manager` ServiceAccount on its own cluster, then writes a cluster-registration Secret directly into the `platform` cluster's `argocd` namespace using a second, aliased `kubernetes` provider. See `argocd/README.md` for the full explanation of this mechanism.
+
+## AWS Authentication: IRSA → Pod Identity Migration
+
+This project originally used **IRSA** (IAM Roles for Service Accounts) to give the EBS CSI driver and External Secrets Operator permission to call AWS APIs from inside the cluster. It has since been migrated to **EKS Pod Identity**, AWS's newer and simpler mechanism for the same purpose. Both are documented here because the reasoning behind the switch is itself a useful record of a real tradeoff decision.
+
+### What IRSA looked like
+
+```hcl
+# An OIDC provider had to be created per cluster
+data "tls_certificate" "eks" {
+  url = aws_eks_cluster.main.identity[0].oidc[0].issuer
+}
+
+resource "aws_iam_openid_connect_provider" "eks" {
+  client_id_list  = ["sts.amazonaws.com"]
+  thumbprint_list = [data.tls_certificate.eks.certificates[0].sha1_fingerprint]
+  url             = aws_eks_cluster.main.identity[0].oidc[0].issuer
+}
+
+# Each IAM role's trust policy referenced that OIDC provider directly,
+# scoped to one specific namespace:serviceaccount combination
+resource "aws_iam_role" "ebs_csi" {
+  assume_role_policy = jsonencode({
+    Statement = [{
+      Effect    = "Allow"
+      Principal = { Federated = aws_iam_openid_connect_provider.eks.arn }
+      Action    = "sts:AssumeRoleWithWebIdentity"
+      Condition = {
+        StringEquals = {
+          "${...}:sub" = "system:serviceaccount:kube-system:ebs-csi-controller-sa"
+        }
+      }
+    }]
+  })
+}
+```
+
+The matching Kubernetes ServiceAccount also needed an explicit annotation:
+
+```yaml
+metadata:
+  annotations:
+    eks.amazonaws.com/role-arn: arn:aws:iam::<account>:role/<role-name>
+```
+
+For Helm-installed components (External Secrets Operator), this annotation had to be injected via a Helm `set` value, since the chart's default ServiceAccount has no annotation of its own:
+
+```hcl
+resource "helm_release" "external_secrets" {
+  set {
+    name  = "serviceAccount.annotations.eks\\.amazonaws\\.com/role-arn"
+    value = module.eks.external_secrets_role_arn
+  }
+}
+```
+
+### Why it was replaced
+
+IRSA worked, but it had real, repeated operational friction in this project specifically:
+
+- The annotation lived outside Terraform's direct control on cluster rebuilds that didn't go through the Helm `set` block consistently, requiring a manual `kubectl annotate` step to be re-applied after some reinstalls.
+- Each IAM role's trust policy was tied to one specific cluster's OIDC provider, making the same role harder to reason about across `dev` and `prod` independently.
+- AWS has explicitly positioned Pod Identity as the simpler, currently-recommended mechanism for new EKS workloads going forward.
+
+### What Pod Identity replaced it with
+
+No OIDC provider, no annotation, no Helm `set` value. The IAM role trusts the Pod Identity service directly:
+
+```hcl
+resource "aws_iam_role" "ebs_csi" {
+  name = "${local.name_prefix}-ebs-csi-role"
+
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [{
+      Effect    = "Allow"
+      Principal = { Service = "pods.eks.amazonaws.com" }
+      Action    = ["sts:AssumeRole", "sts:TagSession"]
+    }]
+  })
+}
+```
+
+A separate, explicit resource maps a namespace + ServiceAccount name to that role, instead of relying on an annotation:
+
+```hcl
+resource "aws_eks_pod_identity_association" "ebs_csi" {
+  cluster_name    = aws_eks_cluster.main.name
+  namespace       = "kube-system"
+  service_account = "ebs-csi-controller-sa"
+  role_arn        = aws_iam_role.ebs_csi.arn
+
+  depends_on = [aws_eks_addon.pod_identity]
+}
+```
+
+The `eks-pod-identity-agent` EKS addon (a small DaemonSet) must be installed on the cluster for this to work; it was already present in the addon list before the migration, just unused until now.
+
+The same pattern was applied to both `ebs_csi` and `external_secrets` roles, in both `dev` and `prod`. `platform` has no AWS-permission-bearing workloads and was unaffected by this change.
+
+### A real gotcha hit during the migration
+
+After switching `secretstore.yaml`'s AWS provider config to the Pod Identity pattern (removing its `auth.jwt.serviceAccountRef` block, since `serviceAccountRef` cannot coexist with Pod Identity), the `ClusterSecretStore` kept reverting to the old IRSA-style config and failing with `unable to create session: an IAM role must be associated with service account`, even after the IAM and association changes were confirmed correct on the AWS side.
+
+The cause was **ArgoCD's `selfHeal`**, not a misconfiguration: the fix had only been applied directly to the live cluster via `kubectl apply`, not committed to git. Since ArgoCD's `ecommerce-prod` Application has `selfHeal: true`, every manual edit to a resource it manages gets detected as drift from git and reverted automatically, often within seconds. See `argocd/README.md` → "Known Limitations" for the general rule this implies: **any fix to an ArgoCD-managed resource must be committed and pushed, never applied directly to the cluster, or it will not persist.**
 
 ## Apply Order
 
@@ -179,6 +285,24 @@ aws rds describe-db-engine-versions \
 ```
 
 For Free Tier accounts, keep `multi_az = false`, `backup_retention_days = 0`, and `skip_final_snapshot = true` in the environment's RDS module call.
+
+### `ClusterSecretStore` stuck on `InvalidProviderConfig: unable to create session: an IAM role must be associated with service account ...` after migrating to Pod Identity
+
+**Cause:** This error message is specific to External Secrets Operator's AWS provider validating that no `auth.jwt.serviceAccountRef` is configured. If the `ClusterSecretStore` manifest in git still has that block, removing it directly on the cluster with `kubectl apply` will not help, because ArgoCD's `selfHeal` reverts the live resource back to whatever is committed in git.
+
+**Fix:** Remove the `auth.jwt` block from the actual file under `k8s/overlays/<env>/external-secrets/secretstore.yaml`, then commit and push:
+
+```bash
+git add k8s/overlays/<env>/external-secrets/secretstore.yaml
+git commit -m "fix: remove IRSA-style auth.jwt from ClusterSecretStore for Pod Identity"
+git push
+```
+
+Confirm the live resource actually matches git afterward — `kubectl get clustersecretstore <name> -o yaml` should show no `auth` block under `spec.provider.aws`. If the ExternalSecret still shows a stale `SecretSyncedError` after the store becomes `Ready`, force an immediate re-sync rather than waiting for the refresh interval:
+
+```bash
+kubectl annotate externalsecret <name> -n <namespace> force-sync=$(date +%s) --overwrite
+```
 
 ## See Also
 
