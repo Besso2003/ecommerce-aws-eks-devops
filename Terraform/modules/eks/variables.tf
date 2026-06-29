@@ -68,3 +68,9 @@ variable "aws_region" {
   description = "AWS region"
   type        = string
 }
+
+variable "github_actions_plan_role_arn" {
+  description = "IAM role ARN for GitHub Actions terraform-plan, granted read-only EKS access entry"
+  type        = string
+  default     = ""
+}
