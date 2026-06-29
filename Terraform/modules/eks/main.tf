@@ -189,9 +189,10 @@ resource "aws_eks_pod_identity_association" "external_secrets" {
 # Kubernetes resources, without granting any write/create/delete access.
 
 resource "aws_eks_access_entry" "github_actions_plan" {
-  count         = var.github_actions_plan_role_arn != "" ? 1 : 0
-  cluster_name  = aws_eks_cluster.main.name
-  principal_arn = var.github_actions_plan_role_arn
+  count             = var.github_actions_plan_role_arn != "" ? 1 : 0
+  cluster_name      = aws_eks_cluster.main.name
+  principal_arn     = var.github_actions_plan_role_arn
+  kubernetes_groups = ["github-actions-plan-readonly-group"]
 
   tags = var.tags
 }
@@ -224,8 +225,8 @@ resource "kubernetes_cluster_role_binding" "github_actions_plan_readonly" {
   }
 
   subject {
-    kind      = "User"
-    name      = var.github_actions_plan_role_arn
+    kind      = "Group"
+    name      = "github-actions-plan-readonly-group"
     api_group = "rbac.authorization.k8s.io"
   }
 }
