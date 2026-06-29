@@ -32,7 +32,7 @@ jobs:
       - name: Terraform Plan
         working-directory: Terraform/environments/dev
         id: plan
-        run: terraform plan -no-color
+        run: terraform plan -no-color -lock=false
         continue-on-error: true
 
       - name: Comment plan on PR
