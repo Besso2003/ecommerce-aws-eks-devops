@@ -29,7 +29,10 @@ provider "helm" {
     exec {
       api_version = "client.authentication.k8s.io/v1beta1"
       command     = "aws"
-      args        = ["eks", "get-token", "--cluster-name", module.eks.cluster_name, "--region", var.aws_region, "--profile", var.aws_profile]
+      args = concat(
+        ["eks", "get-token", "--cluster-name", module.eks.cluster_name, "--region", var.aws_region],
+        var.aws_profile != "" ? ["--profile", var.aws_profile] : []
+      )
     }
   }
 }
@@ -40,7 +43,10 @@ provider "kubernetes" {
   exec {
     api_version = "client.authentication.k8s.io/v1beta1"
     command     = "aws"
-    args        = ["eks", "get-token", "--cluster-name", module.eks.cluster_name, "--region", var.aws_region, "--profile", var.aws_profile]
+    args = concat(
+      ["eks", "get-token", "--cluster-name", module.eks.cluster_name, "--region", var.aws_region],
+      var.aws_profile != "" ? ["--profile", var.aws_profile] : []
+    )
   }
 }
 
@@ -87,6 +93,7 @@ module "eks" {
   node_min_size        = var.node_min_size
   node_max_size        = var.node_max_size
   aws_region           = var.aws_region
+  github_actions_plan_role_arn = "arn:aws:iam::707938860152:role/github-actions-terraform-plan"
 }
 
 module "ecr" {

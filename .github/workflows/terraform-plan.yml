@@ -11,8 +11,11 @@ permissions:
   pull-requests: write
 
 jobs:
-  plan-dev:
+  plan:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        environment: [dev, prod, platform]
     steps:
       - uses: actions/checkout@v4
 
@@ -26,11 +29,11 @@ jobs:
         uses: hashicorp/setup-terraform@v3
 
       - name: Terraform Init
-        working-directory: Terraform/environments/dev
+        working-directory: Terraform/environments/${{ matrix.environment }}
         run: terraform init
 
       - name: Terraform Plan
-        working-directory: Terraform/environments/dev
+        working-directory: Terraform/environments/${{ matrix.environment }}
         id: plan
         run: terraform plan -no-color -lock=false -var="aws_profile="
         continue-on-error: true
@@ -39,7 +42,7 @@ jobs:
         uses: actions/github-script@v7
         with:
           script: |
-            const output = `#### Terraform Plan: \`dev\`
+            const output = `#### Terraform Plan: \`${{ matrix.environment }}\`
             \`\`\`
             ${{ steps.plan.outputs.stdout }}
             \`\`\`
