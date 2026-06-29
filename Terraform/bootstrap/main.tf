@@ -123,3 +123,35 @@ resource "aws_iam_role_policy_attachment" "github_actions_ecr_push" {
   role       = aws_iam_role.github_actions_ecr_push.name
   policy_arn = aws_iam_policy.github_actions_ecr_push.arn
 }
+
+
+# GitHub Actions OIDC — Terraform plan-on-PR
+# Read-only across the account. Used ONLY to run "terraform plan"
+# automatically on pull requests. Cannot create, modify, or delete
+# anything.
+
+resource "aws_iam_role" "github_actions_terraform_plan" {
+  name = "github-actions-terraform-plan"
+
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [{
+      Effect    = "Allow"
+      Principal = { Federated = aws_iam_openid_connect_provider.github_actions.arn }
+      Action    = "sts:AssumeRoleWithWebIdentity"
+      Condition = {
+        StringEquals = {
+          "token.actions.githubusercontent.com:aud" = "sts.amazonaws.com"
+        }
+        StringLike = {
+          "token.actions.githubusercontent.com:sub" = "repo:Besso2003/ecommerce-aws-eks-devops:*"
+        }
+      }
+    }]
+  })
+}
+
+resource "aws_iam_role_policy_attachment" "github_actions_terraform_plan_readonly" {
+  role       = aws_iam_role.github_actions_terraform_plan.name
+  policy_arn = "arn:aws:iam::aws:policy/ReadOnlyAccess"
+}
