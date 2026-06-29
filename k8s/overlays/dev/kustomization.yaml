@@ -17,7 +17,6 @@ resources:
   - ../../base/checkout
   - ../../base/fraud-detection
   - ../../base/accounting
-  - ../../base/product-reviews
   - ../../base/image-provider
   - ../../base/flagd
   - ../../base/flagd-ui
@@ -77,10 +76,6 @@ patches:
     target:
       kind: Deployment
       name: accounting
-  - path: patches/product-reviews-patch.yaml
-    target:
-      kind: Deployment
-      name: product-reviews
   - path: patches/image-provider-patch.yaml
     target:
       kind: Deployment
