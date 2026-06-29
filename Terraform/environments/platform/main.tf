@@ -87,6 +87,7 @@ module "eks" {
   node_min_size        = var.node_min_size
   node_max_size        = var.node_max_size
   aws_region           = var.aws_region
+  github_actions_plan_role_arn = "arn:aws:iam::707938860152:role/github-actions-terraform-plan"
 }
 
 # ArgoCD — the hub. This is the ONLY cluster that runs ArgoCD.

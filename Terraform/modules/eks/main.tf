@@ -183,3 +183,50 @@ resource "aws_eks_pod_identity_association" "external_secrets" {
 
   depends_on = [aws_eks_addon.pod_identity]
 }
+
+# Read-only EKS Access Entry for GitHub Actions terraform-plan
+# Lets the plan-only CI role authenticate to this cluster and read
+# Kubernetes resources, without granting any write/create/delete access.
+
+resource "aws_eks_access_entry" "github_actions_plan" {
+  count             = var.github_actions_plan_role_arn != "" ? 1 : 0
+  cluster_name      = aws_eks_cluster.main.name
+  principal_arn     = var.github_actions_plan_role_arn
+  kubernetes_groups = ["github-actions-plan-readonly-group"]
+
+  tags = var.tags
+}
+
+resource "kubernetes_cluster_role" "github_actions_plan_readonly" {
+  count = var.github_actions_plan_role_arn != "" ? 1 : 0
+
+  metadata {
+    name = "github-actions-plan-readonly"
+  }
+
+  rule {
+    api_groups = ["*"]
+    resources  = ["*"]
+    verbs      = ["get", "list", "watch"]
+  }
+}
+
+resource "kubernetes_cluster_role_binding" "github_actions_plan_readonly" {
+  count = var.github_actions_plan_role_arn != "" ? 1 : 0
+
+  metadata {
+    name = "github-actions-plan-readonly-binding"
+  }
+
+  role_ref {
+    api_group = "rbac.authorization.k8s.io"
+    kind      = "ClusterRole"
+    name      = kubernetes_cluster_role.github_actions_plan_readonly[0].metadata[0].name
+  }
+
+  subject {
+    kind      = "Group"
+    name      = "github-actions-plan-readonly-group"
+    api_group = "rbac.authorization.k8s.io"
+  }
+}
