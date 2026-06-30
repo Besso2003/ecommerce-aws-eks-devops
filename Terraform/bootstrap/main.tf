@@ -113,7 +113,10 @@ resource "aws_iam_policy" "github_actions_ecr_push" {
           "ecr:CompleteLayerUpload",
           "ecr:BatchGetImage",
         ]
-        Resource = "arn:aws:ecr:eu-north-1:*:repository/ecommerce-dev/*"
+        Resource = [
+          "arn:aws:ecr:eu-north-1:*:repository/ecommerce-dev/*",
+          "arn:aws:ecr:eu-north-1:*:repository/ecommerce-prod/*",
+        ]
       }
     ]
   })
