@@ -39,7 +39,9 @@ k8s/
 │
 └── overlays/                    # Environment-specific configuration
     ├── dev/
-    │   ├── patches/              # Resource limits and replica overrides
+    │   ├── patches/              # Resource limits, replica overrides,
+    │   │                          # and image tags (see "Where Image
+    │   │                          # Tags Come From" below)
     │   ├── namespace.yaml
     │   └── kustomization.yaml
     └── prod/
@@ -100,8 +102,8 @@ The differences between environments are replica counts, resource limits, PDB va
 ---
 
 ## Prod Database (RDS)
-![Dev versus prod postgres architecture](../docs/images/k8s-db-architecture.svg)
 
+![Dev versus prod postgres architecture](../docs/images/k8s-db-architecture.svg)
 
 Unlike dev, `prod` does not run a `postgres` StatefulSet. The `postgres` base folder is excluded from `k8s/overlays/prod/kustomization.yaml`, and is replaced by three resources under `k8s/overlays/prod/external-secrets/`:
 
@@ -109,7 +111,7 @@ Unlike dev, `prod` does not run a `postgres` StatefulSet. The `postgres` base fo
 external-secrets/
   secretstore.yaml               # ClusterSecretStore — tells External
   │                                Secrets Operator how to read AWS
-  │                                Secrets Manager via IRSA
+  │                                Secrets Manager via EKS Pod Identity
   postgres-external-secret.yaml  # ExternalSecret — pulls the RDS
   │                                credentials Terraform generated and
   │                                creates a k8s Secret named
@@ -173,6 +175,7 @@ If a pod is deleted and recreated, it automatically reattaches to its existing P
 ---
 
 ## Services
+
 ![Ecommerce microservices architecture](../docs/images/Ecommerce-microservices-arch.png)
 
 ### Stateless Services (Deployment + Service + ConfigMap + HPA + PDB)
@@ -277,21 +280,57 @@ This project intentionally uses **two different approaches** depending on whethe
 
 ### Real credentials — prod's RDS password
 
+This project originally authenticated External Secrets Operator using **IRSA** (IAM Roles for Service Accounts), then migrated to **EKS Pod Identity**. Both are documented here since the reasoning behind the switch is itself a useful record of a real tradeoff decision.
+
+**Original implementation — IRSA:**
+
 ```text
 Terraform generates a 32-character random_password
      ↓
 Stored in AWS Secrets Manager
      ↓
-External Secrets Operator (IRSA-authenticated) reads it via a
-ClusterSecretStore
+An OIDC provider, created per cluster, let External Secrets
+Operator's ServiceAccount assume an IAM role via
+sts:AssumeRoleWithWebIdentity. The ServiceAccount needed an
+explicit annotation:
+  eks.amazonaws.com/role-arn: arn:aws:iam::<account>:role/<role>
+For Helm-installed components, this annotation had to be injected
+via a Helm `set` value, since the chart's default ServiceAccount
+carries no annotation of its own
      ↓
-An ExternalSecret creates a k8s Secret named postgres-secret in the
-prod namespace
+External Secrets Operator reads the secret via a ClusterSecretStore
+     ↓
+An ExternalSecret creates a k8s Secret named postgres-secret
      ↓
 Pods consume it exactly as they would any other k8s Secret
 ```
 
-The real password is never typed by a human, never appears in this repo, and never appears in a plain Kubernetes Secret manifest. Full details are in `../Terraform/README.md`.
+This worked, but had real, repeated friction: the IRSA annotation lived outside Terraform's direct control on some cluster rebuilds, occasionally requiring a manual `kubectl annotate` to be re-applied; and each IAM role's trust policy was tied to one specific cluster's OIDC provider, making the same role harder to reason about across `dev` and `prod` independently.
+
+**Current implementation — EKS Pod Identity:**
+
+```text
+Terraform generates a 32-character random_password
+     ↓
+Stored in AWS Secrets Manager
+     ↓
+An aws_eks_pod_identity_association maps the External Secrets
+Operator ServiceAccount (namespace + name, no annotation needed)
+directly to an IAM role. The role's trust policy simply trusts
+pods.eks.amazonaws.com - no OIDC provider, no per-cluster wiring
+     ↓
+External Secrets Operator reads the secret via a ClusterSecretStore
+(its AWS provider config has no auth.jwt block at all - Pod
+Identity is picked up automatically via the default credential chain)
+     ↓
+An ExternalSecret creates a k8s Secret named postgres-secret
+     ↓
+Pods consume it exactly as they would any other k8s Secret
+```
+
+No OIDC provider, no ServiceAccount annotation, and no Helm `set` value are needed anymore. The full migration — including the exact Terraform diff and a real bug hit along the way (a `ClusterSecretStore` fix that appeared to work but silently reverted, because it had been applied directly to the cluster instead of through git) — is documented in `../Terraform/README.md` and `../argocd/README.md`.
+
+The real password is never typed by a human, never appears in this repo, and never appears in a plain Kubernetes Secret manifest, under either implementation.
 
 ### Non-sensitive placeholders — payment, and dev's postgres
 
@@ -304,13 +343,25 @@ If either of these is ever replaced with a real credential (a real Stripe test k
 
 ### Sealed Secrets
 
-This project does not use Sealed Secrets. Earlier drafts of this README referenced Sealed Secrets and `kubeseal`, but the project settled on the External Secrets Operator + AWS Secrets Manager pattern above instead, since the clusters run on EKS with native AWS integration available via IRSA.
+This project does not use Sealed Secrets. Earlier drafts of this README referenced Sealed Secrets and `kubeseal`, but the project settled on the External Secrets Operator + AWS Secrets Manager pattern above instead, since the clusters run on EKS with native AWS integration available via Pod Identity.
+
+---
+
+## Where Image Tags Come From
+
+Most `deployment.yaml` files in `base/` don't specify a real image tag — they reference the upstream OpenTelemetry Demo images as placeholders. The actual images running in `dev` come from a separate CI pipeline in the `ecommerce-source-code` repo, which builds each service from its own source code, pushes the image to that service's ECR repository (`ecommerce-dev/<service>`), and commits the new tag directly into that service's `k8s/overlays/dev/patches/<service>-patch.yaml` file in THIS repo.
+
+This means the `image:` line you see in a patch file is not meant to be edited by hand under normal circumstances — it's overwritten automatically every time that service's code changes and the CI pipeline runs. See `ecommerce-source-code`'s `.github/workflows/README.md` for the full pipeline.
+
+Not every service has this wired up yet. A patch file with no `image:` line at all means that service has never been built by the pipeline — it's still running its original placeholder image until the first real code change triggers a build. `prod`'s patch files are not touched by this pipeline at all; promoting a known-good image to `prod` is a separate, deliberate step.
 
 ---
 
 ## How to Apply
 
 Manifests in this folder are applied by **ArgoCD**, not by running `kubectl apply -k` directly. See `../argocd/README.md` for the full GitOps setup, including the one-time bootstrap step.
+
+Image tags inside `k8s/overlays/dev/patches/*.yaml` are updated automatically by CI (see "Where Image Tags Come From" above) — you shouldn't normally need to edit them by hand.
 
 For local testing or debugging without going through ArgoCD:
 
@@ -353,7 +404,7 @@ kubectl get clustersecretstore
 
 **RDS for prod's database, EBS-backed StatefulSet for dev's** — prod gets a managed, Multi-AZ-capable database with automated backups; dev keeps a cheap, throwaway in-cluster database, since dev environments are destroyed and recreated frequently and have no real data worth protecting.
 
-**One service account per service** — each pod has its own Kubernetes ServiceAccount, allowing per-service IAM permissions via IRSA where needed (e.g. External Secrets Operator's ServiceAccount).
+**One service account per service** — each pod has its own Kubernetes ServiceAccount, allowing per-service IAM permissions via EKS Pod Identity where needed (e.g. External Secrets Operator's ServiceAccount).
 
 **ConfigMaps for all non-sensitive config** — all non-sensitive settings are stored in Kubernetes ConfigMaps, eliminating hardcoded values from deployment manifests.
 
@@ -409,6 +460,16 @@ kubectl describe pvc -n dev <service>-data-<service>-0
 # Prod's postgres ExternalSecret not syncing
 kubectl get externalsecret -n prod
 kubectl describe externalsecret rds-postgres-secret -n prod
-# Usually means the external-secrets ServiceAccount lost its IRSA
-# annotation — see ../Terraform/README.md for the fix.
+# Usually means the external-secrets ServiceAccount's Pod Identity
+# Association is missing, or the ClusterSecretStore still has a
+# leftover IRSA-style auth.jwt block — see ../Terraform/README.md
+# and ../argocd/README.md for the fix.
+
+# A service's pod is still running the OLD image after a code push
+kubectl rollout status deployment/<service> -n dev
+# Check whether the CI pipeline's commit actually landed:
+git log --oneline -1 -- k8s/overlays/dev/patches/<service>-patch.yaml
+# If the commit is missing, check ecommerce-source-code's Actions
+# tab for that service's build - it may have failed, or the change
+# may not have matched the path filter for that service's folder.
 ```
