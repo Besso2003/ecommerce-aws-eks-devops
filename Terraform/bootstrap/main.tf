@@ -112,6 +112,7 @@ resource "aws_iam_policy" "github_actions_ecr_push" {
           "ecr:UploadLayerPart",
           "ecr:CompleteLayerUpload",
           "ecr:BatchGetImage",
+          "ecr:GetDownloadUrlForLayer",
         ]
         Resource = [
           "arn:aws:ecr:eu-north-1:*:repository/ecommerce-dev/*",
