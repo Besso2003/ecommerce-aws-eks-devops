@@ -7,14 +7,17 @@ This folder contains all Infrastructure as Code for the project, covering three 
 ```
 Terraform/
 ├── bootstrap/          Applied once, never destroyed. Creates the S3
-│                        backend bucket used to store all other state.
+│                        backend bucket, the GitHub OIDC provider, and
+│                        the two IAM roles GitHub Actions assumes
+│                        (see "GitHub Actions Authentication" below).
 ├── modules/             Reusable building blocks
 │   ├── vpc/              VPC, subnets, NAT, IGW, S3 gateway endpoint
 │   ├── iam/              EKS cluster role + node role (no OIDC, avoids
 │   │                      a circular dependency with the eks module)
 │   ├── eks/              Cluster, node group, addons, Pod Identity
 │   │                      Associations, EBS CSI role, External Secrets
-│   │                      IAM role
+│   │                      IAM role, and the read-only EKS Access Entry
+│   │                      used by GitHub Actions' terraform-plan role
 │   ├── ecr/              19 repositories with lifecycle policies
 │   └── rds/              PostgreSQL instance, Secrets Manager secret
 │                          (prod only)
@@ -148,6 +151,40 @@ After switching `secretstore.yaml`'s AWS provider config to the Pod Identity pat
 
 The cause was **ArgoCD's `selfHeal`**, not a misconfiguration: the fix had only been applied directly to the live cluster via `kubectl apply`, not committed to git. Since ArgoCD's `ecommerce-prod` Application has `selfHeal: true`, every manual edit to a resource it manages gets detected as drift from git and reverted automatically, often within seconds. See `argocd/README.md` → "Known Limitations" for the general rule this implies: **any fix to an ArgoCD-managed resource must be committed and pushed, never applied directly to the cluster, or it will not persist.**
 
+## GitHub Actions Authentication
+
+Two CI/CD pipelines run against this AWS account, both authenticating via **OIDC federation** — no AWS access keys are stored as GitHub secrets anywhere. Both the OIDC provider and both IAM roles below live in `Terraform/bootstrap/`, since they're account-wide and don't belong to any one environment.
+
+```
+aws_iam_openid_connect_provider.github_actions
+  -- one OIDC trust relationship between AWS and 
+     token.actions.githubusercontent.com, shared by both roles below
+
+github-actions-ecr-push
+  -- used by ecommerce-source-code's build pipeline
+  -- trust policy scoped to: repo:Besso2003/ecommerce-source-code:
+     ref:refs/heads/main
+  -- permissions: push images only, only to ecommerce-dev/* ECR
+     repositories. Cannot touch ecommerce-prod/*, cannot touch
+     anything outside ECR.
+
+github-actions-terraform-plan
+  -- used by THIS repo's .github/workflows/terraform-plan.yml
+  -- trust policy scoped to: repo:Besso2003/ecommerce-aws-eks-devops:*
+     (any branch, since Pull Requests come from many branches)
+  -- AWS-side permissions: the AWS-managed ReadOnlyAccess policy -
+     can describe/read, can never create, modify, or delete anything
+  -- Kubernetes-side permissions: a dedicated read-only ClusterRole
+     (get, list, watch only), bound via an EKS Access Entry on every
+     cluster (dev, prod, AND platform) - needed because some
+     resources in each environment's main.tf are Kubernetes objects,
+     not AWS objects (the argocd-manager ServiceAccount, its RBAC
+     binding, the ArgoCD registration Secret, the External Secrets
+     Helm release)
+```
+
+Full details on what each pipeline actually does are in `.github/workflows/README.md` (this repo's Terraform plan-on-PR) and `ecommerce-source-code`'s own `.github/workflows/README.md` (the app build/push pipeline).
+
 ## Apply Order
 
 The `platform` environment must exist before `dev` or `prod` are applied, since their Terraform writes a registration secret into the hub's cluster.
@@ -174,22 +211,40 @@ All three are designed to be destroyed when not actively in use. Destroy in the 
 
 ## Destroying an Environment
 
-Always remove Kubernetes-managed resources before running `terraform destroy`. Skipping this step is the single most common cause of a stuck destroy (see Troubleshooting below).
+Use `scripts/safe-destroy.sh` instead of running `terraform destroy` directly. It wraps the same destroy process with automatic detection and cleanup of the single most common cause of a stuck destroy in this project — see the next section for why this is necessary.
 
 ```bash
-kubectl delete -k k8s/overlays/<env>/
-sleep 60
-cd Terraform/environments/<env>
-terraform destroy
+./scripts/safe-destroy.sh dev
+./scripts/safe-destroy.sh prod
+./scripts/safe-destroy.sh platform
 ```
+
+What it does:
+
+```
+1. Deletes Kubernetes-managed resources (kubectl delete -k)
+2. Starts "terraform destroy" running in the background
+3. Watches its live output for the specific pattern that means
+   a stuck Internet Gateway / VPC deletion (the same "Still
+   destroying..." line repeating for ~70+ seconds)
+4. The moment that's detected, automatically finds and deletes any
+   leftover classic ELB and its "k8s-elb-*" security group in that
+   environment's VPC - WHILE terraform destroy keeps running and
+   retrying in the background
+5. terraform destroy's own internal retries pick up the now-cleared
+   blocker and finish normally - the script never needs to restart
+   or re-run terraform itself
+```
+
+If you need to destroy manually for any reason, the equivalent steps are documented in the Troubleshooting section below, under "terraform destroy hangs on the Internet Gateway or VPC."
 
 ## Troubleshooting
 
 ### `terraform destroy` hangs on the Internet Gateway or VPC for 10+ minutes
 
-**Cause:** A Kubernetes `Service` of type `LoadBalancer` (e.g. `frontend-proxy`) created a classic ELB that was never cleaned up before the cluster was deleted. The ELB's network interfaces and security group keep the VPC from detaching its Internet Gateway, and the VPC itself can't be deleted while that security group still exists.
+**Cause:** A Kubernetes `Service` of type `LoadBalancer` (e.g. `frontend-proxy`) created a classic ELB. Depending on timing, this ELB sometimes isn't fully torn down by the time `terraform destroy` reaches the VPC - it can still be mid-creation or mid-deletion at that exact moment, which is why pre-emptively checking for it *before* starting `terraform destroy` doesn't always catch it. The ELB's network interfaces and security group keep the VPC from detaching its Internet Gateway, and the VPC itself can't be deleted while that security group still exists. `scripts/safe-destroy.sh` (see above) handles this automatically by watching for the stuck pattern *while destroy is running* rather than checking only beforehand.
 
-**Fix:**
+**Manual fix, if not using the script:**
 
 ```bash
 # 1. Find the VPC behind the stuck IGW
@@ -304,7 +359,53 @@ Confirm the live resource actually matches git afterward — `kubectl get cluste
 kubectl annotate externalsecret <name> -n <namespace> force-sync=$(date +%s) --overwrite
 ```
 
+### `terraform plan` fails with `Error acquiring the state lock ... AccessDeniedException: ... dynamodb:PutItem`
+
+**Cause:** This happens specifically when running `terraform plan` using a deliberately read-only role, such as GitHub Actions' `github-actions-terraform-plan`. State locking normally requires writing a temporary entry into DynamoDB before reading anything, which a true read-only role correctly cannot do.
+
+**Fix:** Pass `-lock=false`. This is safe specifically because a read-only role can never run `apply` — there's no concurrent-write scenario to protect against:
+
+```bash
+terraform plan -lock=false
+```
+
+### `terraform plan` fails with `Error: failed to get shared config profile, bassant`
+
+**Cause:** Every environment's `provider "aws"` block, and both `exec` blocks used to fetch a Kubernetes token, default to a personal AWS CLI profile (`var.aws_profile`, default `"bassant"`) that only exists on a local machine, not on a CI runner.
+
+**Fix:** Override the variable for that one run:
+
+```bash
+terraform plan -var="aws_profile="
+```
+
+Each environment's `exec` blocks wrap the `--profile` flag in `concat(...)`, so the flag is only added when `aws_profile` is non-empty — passing an empty string makes both the AWS provider and `aws eks get-token` fall back to whatever credentials are already present as environment variables (the OIDC-issued ones, in CI). This has no effect on local usage, since the local default remains `"bassant"` unless explicitly overridden.
+
+### A `ClusterRoleBinding` targeting an IAM role's ARN as a `User` subject silently never matches
+
+**Cause:** When an IAM **role** (as opposed to an IAM **user**) authenticates to an EKS cluster, Kubernetes sees the STS *assumed-role session* identity (`arn:aws:sts::<account>:assumed-role/<role-name>/<session-name>`), not the plain IAM role ARN. A `ClusterRoleBinding` subject of `kind: User, name: <plain-role-arn>` will never match this, resulting in `... is forbidden ...` errors even though the IAM role and the binding both look correct.
+
+**Fix:** Use `kubernetes_groups` on the `aws_eks_access_entry` resource, and bind the `ClusterRoleBinding`'s subject to that group (`kind: Group`) instead of trying to match the unpredictable session ARN string:
+
+```hcl
+resource "aws_eks_access_entry" "github_actions_plan" {
+  cluster_name      = aws_eks_cluster.main.name
+  principal_arn     = var.github_actions_plan_role_arn
+  kubernetes_groups = ["github-actions-plan-readonly-group"]
+}
+
+resource "kubernetes_cluster_role_binding" "github_actions_plan_readonly" {
+  # ...
+  subject {
+    kind      = "Group"
+    name      = "github-actions-plan-readonly-group"
+    api_group = "rbac.authorization.k8s.io"
+  }
+}
+```
+
 ## See Also
 
-- `argocd/README.md` — how the hub-and-spoke ArgoCD setup is wired into these environments
-- `k8s/README.md` — the Kubernetes manifests these environments ultimately run
+- `argocd/README.md` — how the hub-and-spoke ArgoCD setup is wired into these environments, including the `selfHeal` lesson referenced above
+- `k8s/README.md` — the Kubernetes manifests these environments ultimately run, including where image tags come from
+- `.github/workflows/README.md` — the Terraform plan-on-PR pipeline that uses the OIDC roles documented above
