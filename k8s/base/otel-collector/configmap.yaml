@@ -4,6 +4,10 @@ metadata:
   name: otel-collector-config
 data:
   otelcol-config.yml: |
+    extensions:
+      health_check:
+        endpoint: 0.0.0.0:13133
+
     receivers:
       otlp:
         protocols:
@@ -69,6 +73,7 @@ data:
       spanmetrics:
 
     service:
+      extensions: [health_check]
       pipelines:
         traces:
           receivers: [otlp]

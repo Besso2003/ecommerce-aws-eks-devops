@@ -213,6 +213,8 @@ resource "helm_release" "kube_prometheus_stack" {
     prometheus:
       prometheusSpec:
         retention: 15d
+        enableFeatures:
+          - otlp-write-receiver
         storageSpec:
           volumeClaimTemplate:
             spec:
