@@ -1,0 +1,20 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: ecommerce-monitoring-dev
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/Besso2003/ecommerce-aws-eks-devops
+    targetRevision: main
+    path: k8s/overlays/monitoring/dev
+  destination:
+    name: dev
+    namespace: monitoring
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
