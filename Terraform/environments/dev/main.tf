@@ -292,3 +292,30 @@ resource "helm_release" "loki" {
 
   depends_on = [kubernetes_namespace.monitoring]
 }
+
+resource "helm_release" "tempo" {
+  name             = "tempo"
+  repository       = "https://grafana.github.io/helm-charts"
+  chart            = "tempo"
+  version          = "1.10.3"
+  namespace        = "monitoring"
+  create_namespace = false
+
+  values = [<<-EOT
+    tempo:
+      storage:
+        trace:
+          backend: local
+          local:
+            path: /var/tempo/traces
+    persistence:
+      enabled: true
+      storageClassName: ebs-gp3
+      size: 10Gi
+    service:
+      type: ClusterIP
+  EOT
+  ]
+
+  depends_on = [kubernetes_namespace.monitoring]
+}
