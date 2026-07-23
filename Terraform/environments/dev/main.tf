@@ -190,3 +190,50 @@ resource "kubernetes_secret" "argocd_register_dev" {
 
   depends_on = [kubernetes_secret.argocd_manager_token]
 }
+
+resource "kubernetes_namespace" "monitoring" {
+  metadata {
+    name = "monitoring"
+  }
+
+  depends_on = [module.eks]
+}
+
+resource "helm_release" "kube_prometheus_stack" {
+  name             = "kube-prometheus-stack"
+  repository       = "https://prometheus-community.github.io/helm-charts"
+  chart            = "kube-prometheus-stack"
+  version          = "61.3.0"
+  namespace        = "monitoring"
+  create_namespace = false
+
+  values = [<<-EOT
+    grafana:
+      enabled: false
+    prometheus:
+      prometheusSpec:
+        retention: 15d
+        storageSpec:
+          volumeClaimTemplate:
+            spec:
+              storageClassName: ebs-gp3
+              accessModes: ["ReadWriteOnce"]
+              resources:
+                requests:
+                  storage: 10Gi
+        enableRemoteWriteReceiver: true
+    alertmanager:
+      alertmanagerSpec:
+        storage:
+          volumeClaimTemplate:
+            spec:
+              storageClassName: ebs-gp3
+              accessModes: ["ReadWriteOnce"]
+              resources:
+                requests:
+                  storage: 2Gi
+  EOT
+  ]
+
+  depends_on = [kubernetes_namespace.monitoring]
+}
