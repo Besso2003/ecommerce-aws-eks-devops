@@ -6,3 +6,4 @@ data:
   FLAGD_UI_PORT: "4000"
   FLAGD_HOST: "flagd"
   FLAGD_OFREP_PORT: "8016"
+  OTEL_EXPORTER_OTLP_ENDPOINT: "http://otel-collector.monitoring.svc.cluster.local:4317"

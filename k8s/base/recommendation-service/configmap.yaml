@@ -6,6 +6,7 @@ data:
   RECOMMENDATION_PORT: "1010"
   PRODUCT_CATALOG_ADDR: "product-catalog:8088"
   OTEL_SERVICE_NAME: "recommendation-service"
-  OTEL_SDK_DISABLED: "true"
+  # OTEL_SDK_DISABLED: "true"
+  OTEL_EXPORTER_OTLP_ENDPOINT: "http://otel-collector.monitoring.svc.cluster.local:4317"
   OTEL_EXPORTER_OTLP_METRICS_TEMPORALITY_PREFERENCE: "cumulative"
   PROTOCOL_BUFFERS_PYTHON_IMPLEMENTATION: "python"

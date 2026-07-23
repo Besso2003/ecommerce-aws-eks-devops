@@ -23,6 +23,7 @@ data:
   FLAGD_HOST: "flagd"
   FLAGD_PORT: "8013"
   OTEL_SERVICE_NAME: "checkout"
-  OTEL_SDK_DISABLED: "true"
+  # OTEL_SDK_DISABLED: "true"
+  OTEL_EXPORTER_OTLP_ENDPOINT: "http://otel-collector.monitoring.svc.cluster.local:4317"
   OTEL_EXPORTER_OTLP_METRICS_TEMPORALITY_PREFERENCE: "cumulative"
   OTEL_RESOURCE_ATTRIBUTES: "service.namespace=opentelemetry-demo"

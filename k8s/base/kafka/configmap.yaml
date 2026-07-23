@@ -13,5 +13,6 @@ data:
   KAFKA_NODE_ID: "1"
   KAFKA_CONTROLLER_QUORUM_VOTERS: "1@localhost:9093"
   KAFKA_HEAP_OPTS: "-Xmx400M -Xms400M"
-  OTEL_SDK_DISABLED: "true"
+  # OTEL_SDK_DISABLED: "true"
+  OTEL_EXPORTER_OTLP_ENDPOINT: "http://otel-collector.monitoring.svc.cluster.local:4317"
   KAFKA_LOG_DIR_FAILURE_TIMEOUT_MS: "30000"

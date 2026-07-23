@@ -34,3 +34,4 @@ data:
   TELEMETRY_DOCS_PORT: "8000"
   OTEL_SERVICE_NAME: "frontend-proxy"
   OTEL_RESOURCE_ATTRIBUTES: "service.namespace=opentelemetry-demo"
+  OTEL_EXPORTER_OTLP_ENDPOINT: "http://otel-collector.monitoring.svc.cluster.local:4317"

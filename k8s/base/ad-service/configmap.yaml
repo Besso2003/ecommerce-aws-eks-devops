@@ -6,3 +6,4 @@ data:
   AD_PORT: "9099"
   FLAGD_HOST: "flagd"
   FLAGD_PORT: "8013"
+  OTEL_EXPORTER_OTLP_ENDPOINT: "http://otel-collector.monitoring.svc.cluster.local:4317"

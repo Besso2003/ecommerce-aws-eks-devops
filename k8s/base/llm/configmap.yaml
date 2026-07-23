@@ -5,4 +5,5 @@ metadata:
 data:
   LLM_PORT: "8000"
   OTEL_SERVICE_NAME: "llm"
-  OTEL_SDK_DISABLED: "true"
+  # OTEL_SDK_DISABLED: "true"
+  OTEL_EXPORTER_OTLP_ENDPOINT: "http://otel-collector.monitoring.svc.cluster.local:4317"

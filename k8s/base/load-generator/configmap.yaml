@@ -8,6 +8,7 @@ data:
   LOCUST_HOST: "http://frontend-proxy:8080"
   LOCUST_AUTOSTART: "true"
   LOCUST_HEADLESS: "false"
-  OTEL_SDK_DISABLED: "true"
+  # OTEL_SDK_DISABLED: "true"
+  OTEL_EXPORTER_OTLP_ENDPOINT: "http://otel-collector.monitoring.svc.cluster.local:4317"
   OTEL_SERVICE_NAME: "load-generator"
   OTEL_RESOURCE_ATTRIBUTES: "service.namespace=opentelemetry-demo"

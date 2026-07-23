@@ -5,5 +5,6 @@ metadata:
 data:
   IMAGE_PROVIDER_PORT: "8081"
   OTEL_SERVICE_NAME: "image-provider"
-  OTEL_SDK_DISABLED: "true"
+  # OTEL_SDK_DISABLED: "true"
+  OTEL_EXPORTER_OTLP_ENDPOINT: "http://otel-collector.monitoring.svc.cluster.local:4317"
   OTEL_RESOURCE_ATTRIBUTES: "service.namespace=opentelemetry-demo"

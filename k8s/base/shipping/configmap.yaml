@@ -6,6 +6,7 @@ data:
   SHIPPING_PORT: "50050"
   QUOTE_SERVICE_ADDR: "http://quote:8090"
   OTEL_SERVICE_NAME: "shipping"
-  OTEL_SDK_DISABLED: "true"
+  # OTEL_SDK_DISABLED: "true"
+  OTEL_EXPORTER_OTLP_ENDPOINT: "http://otel-collector.monitoring.svc.cluster.local:4317"
   OTEL_EXPORTER_OTLP_METRICS_TEMPORALITY_PREFERENCE: "cumulative"
   OTEL_RESOURCE_ATTRIBUTES: "service.namespace=opentelemetry-demo"
