@@ -37,3 +37,13 @@ output "private_subnet_cidrs" {
   description = "List of private subnet CIDR blocks"
   value       = aws_subnet.private[*].cidr_block
 }
+
+output "private_route_table_ids" {
+  description = "List of private route table IDs"
+  value       = aws_route_table.private[*].id
+}
+
+output "public_route_table_ids" {
+  description = "List of public route table IDs"
+  value       = [aws_route_table.public.id]
+}

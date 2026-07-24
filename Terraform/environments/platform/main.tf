@@ -108,3 +108,78 @@ resource "helm_release" "argocd" {
 
   depends_on = [kubernetes_namespace.argocd]
 }
+
+resource "kubernetes_namespace" "monitoring" {
+  metadata {
+    name = "monitoring"
+  }
+  depends_on = [module.eks]
+}
+
+resource "helm_release" "grafana" {
+  name             = "grafana"
+  repository       = "https://grafana.github.io/helm-charts"
+  chart            = "grafana"
+  version          = "8.3.6"
+  namespace        = "monitoring"
+  create_namespace = false
+
+  values = [<<-EOT
+    adminPassword: "admin123"
+    persistence:
+      enabled: true
+      storageClassName: ebs-gp3
+      size: 5Gi
+    service:
+      type: LoadBalancer
+      annotations:
+        service.beta.kubernetes.io/aws-load-balancer-internal: "true"
+    datasources:
+      datasources.yaml:
+        apiVersion: 1
+        datasources:
+          - name: Prometheus (dev)
+            type: prometheus
+            uid: prometheus-dev
+            url: http://internal-ab215d4de7d81482598119848418e536-273134346.eu-north-1.elb.amazonaws.com:9090
+            access: proxy
+            isDefault: true
+          - name: Loki (dev)
+            type: loki
+            url: http://internal-ac22491bba0f84b2088c22e81919610b-730837534.eu-north-1.elb.amazonaws.com:3100
+            access: proxy
+          - name: Tempo (dev)
+            type: tempo
+            url: http://internal-ab8f8df20456e4eada6fb63e14cf857e-975497401.eu-north-1.elb.amazonaws.com:3100
+            access: proxy
+            jsonData:
+              serviceMap:
+                datasourceUid: prometheus-dev
+    dashboardProviders:
+      dashboardproviders.yaml:
+        apiVersion: 1
+        providers:
+          - name: default
+            folder: Kubernetes
+            type: file
+            options:
+              path: /var/lib/grafana/dashboards/default
+    dashboards:
+      default:
+        kubernetes-cluster:
+          gnetId: 315
+          revision: 3
+          datasource: Prometheus (dev)
+        kubernetes-pods:
+          gnetId: 747
+          revision: 2
+          datasource: Prometheus (dev)
+        node-exporter:
+          gnetId: 1860
+          revision: 37
+          datasource: Prometheus (dev)
+  EOT
+  ]
+
+  depends_on = [kubernetes_namespace.monitoring]
+}
