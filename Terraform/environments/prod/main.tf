@@ -14,6 +14,10 @@ terraform {
       source  = "hashicorp/kubernetes"
       version = "~> 2.31"
     }
+    tls = {
+      source  = "hashicorp/tls"
+      version = "~> 4.0"
+    }
   }
 }
 
@@ -223,4 +227,263 @@ resource "kubernetes_secret" "argocd_register_prod" {
   }
 
   depends_on = [kubernetes_secret.argocd_manager_token]
+}
+
+##############################################################################
+# Observability stack — prod
+# Same pattern as dev: Prometheus (EBS), Loki (S3+Pod Identity),
+# Tempo (S3+IRSA), otel-collector via ArgoCD
+##############################################################################
+
+data "aws_caller_identity" "current" {}
+
+resource "kubernetes_namespace" "monitoring" {
+  metadata {
+    name = "monitoring"
+  }
+  depends_on = [module.eks]
+}
+
+# S3 buckets
+resource "aws_s3_bucket" "loki" {
+  bucket        = "ecommerce-prod-loki-${data.aws_caller_identity.current.account_id}"
+  force_destroy = true
+  tags          = local.common_tags
+}
+resource "aws_s3_bucket_versioning" "loki" {
+  bucket = aws_s3_bucket.loki.id
+  versioning_configuration { status = "Suspended" }
+}
+resource "aws_s3_bucket" "tempo" {
+  bucket        = "ecommerce-prod-tempo-${data.aws_caller_identity.current.account_id}"
+  force_destroy = true
+  tags          = local.common_tags
+}
+resource "aws_s3_bucket_versioning" "tempo" {
+  bucket = aws_s3_bucket.tempo.id
+  versioning_configuration { status = "Suspended" }
+}
+
+# Loki — Pod Identity
+resource "aws_iam_role" "loki" {
+  name = "ecommerce-prod-loki-role"
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [{
+      Effect    = "Allow"
+      Principal = { Service = "pods.eks.amazonaws.com" }
+      Action    = ["sts:AssumeRole", "sts:TagSession"]
+    }]
+  })
+  tags = local.common_tags
+}
+resource "aws_iam_policy" "loki" {
+  name = "ecommerce-prod-loki-policy"
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [{
+      Effect = "Allow"
+      Action = [
+        "s3:PutObject", "s3:GetObject", "s3:DeleteObject",
+        "s3:ListBucket", "s3:GetBucketLocation"
+      ]
+      Resource = [aws_s3_bucket.loki.arn, "${aws_s3_bucket.loki.arn}/*"]
+    }]
+  })
+}
+resource "aws_iam_role_policy_attachment" "loki" {
+  role       = aws_iam_role.loki.name
+  policy_arn = aws_iam_policy.loki.arn
+}
+resource "aws_eks_pod_identity_association" "loki" {
+  cluster_name    = module.eks.cluster_name
+  namespace       = "monitoring"
+  service_account = "loki"
+  role_arn        = aws_iam_role.loki.arn
+  depends_on      = [module.eks]
+}
+
+# Tempo — IRSA (Pod Identity not supported by Tempo 2.5.0's vendored SDK)
+data "tls_certificate" "eks" {
+  url = "https://oidc.eks.eu-north-1.amazonaws.com/id/CD4000D3206E4F3E0A02A1138EEDCDFA"
+}
+resource "aws_iam_openid_connect_provider" "eks" {
+  client_id_list  = ["sts.amazonaws.com"]
+  thumbprint_list = [data.tls_certificate.eks.certificates[0].sha1_fingerprint]
+  url             = "https://oidc.eks.eu-north-1.amazonaws.com/id/CD4000D3206E4F3E0A02A1138EEDCDFA"
+}
+resource "aws_iam_policy" "tempo" {
+  name = "ecommerce-prod-tempo-policy"
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [{
+      Effect = "Allow"
+      Action = [
+        "s3:PutObject", "s3:GetObject", "s3:DeleteObject",
+        "s3:ListBucket", "s3:GetBucketLocation"
+      ]
+      Resource = [aws_s3_bucket.tempo.arn, "${aws_s3_bucket.tempo.arn}/*"]
+    }]
+  })
+}
+resource "aws_iam_role" "tempo_irsa" {
+  name = "ecommerce-prod-tempo-irsa-role"
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [{
+      Effect = "Allow"
+      Principal = {
+        Federated = aws_iam_openid_connect_provider.eks.arn
+      }
+      Action = "sts:AssumeRoleWithWebIdentity"
+      Condition = {
+        StringEquals = {
+          "oidc.eks.eu-north-1.amazonaws.com/id/CD4000D3206E4F3E0A02A1138EEDCDFA:sub" = "system:serviceaccount:monitoring:tempo"
+          "oidc.eks.eu-north-1.amazonaws.com/id/CD4000D3206E4F3E0A02A1138EEDCDFA:aud" = "sts.amazonaws.com"
+        }
+      }
+    }]
+  })
+  tags = local.common_tags
+}
+resource "aws_iam_role_policy_attachment" "tempo_irsa" {
+  role       = aws_iam_role.tempo_irsa.name
+  policy_arn = aws_iam_policy.tempo.arn
+}
+
+# kube-prometheus-stack
+resource "helm_release" "kube_prometheus_stack" {
+  name             = "kube-prometheus-stack"
+  repository       = "https://prometheus-community.github.io/helm-charts"
+  chart            = "kube-prometheus-stack"
+  version          = "61.3.0"
+  namespace        = "monitoring"
+  create_namespace = false
+
+  values = [<<-EOT
+    grafana:
+      enabled: false
+    prometheus:
+      prometheusSpec:
+        retention: 30d
+        enableFeatures:
+          - otlp-write-receiver
+        storageSpec:
+          volumeClaimTemplate:
+            spec:
+              storageClassName: ebs-gp3
+              accessModes: ["ReadWriteOnce"]
+              resources:
+                requests:
+                  storage: 20Gi
+        enableRemoteWriteReceiver: true
+    alertmanager:
+      alertmanagerSpec:
+        storage:
+          volumeClaimTemplate:
+            spec:
+              storageClassName: ebs-gp3
+              accessModes: ["ReadWriteOnce"]
+              resources:
+                requests:
+                  storage: 2Gi
+  EOT
+  ]
+  depends_on = [kubernetes_namespace.monitoring]
+}
+
+# Loki
+resource "helm_release" "loki" {
+  name             = "loki"
+  repository       = "https://grafana.github.io/helm-charts"
+  chart            = "loki"
+  version          = "6.7.3"
+  namespace        = "monitoring"
+  create_namespace = false
+
+  values = [<<-EOT
+    deploymentMode: SingleBinary
+    loki:
+      auth_enabled: false
+      commonConfig:
+        replication_factor: 1
+      storage:
+        type: s3
+        s3:
+          region: eu-north-1
+        bucketNames:
+          chunks: ${aws_s3_bucket.loki.id}
+          ruler: ${aws_s3_bucket.loki.id}
+          admin: ${aws_s3_bucket.loki.id}
+      schemaConfig:
+        configs:
+          - from: "2024-01-01"
+            store: tsdb
+            object_store: s3
+            schema: v13
+            index:
+              prefix: loki_index_
+              period: 24h
+    singleBinary:
+      replicas: 1
+    serviceAccount:
+      annotations:
+        eks.amazonaws.com/role-arn: ""
+    read:
+      replicas: 0
+    write:
+      replicas: 0
+    backend:
+      replicas: 0
+    gateway:
+      enabled: false
+    test:
+      enabled: false
+    lokiCanary:
+      enabled: false
+    chunksCache:
+      enabled: false
+    resultsCache:
+      enabled: false
+  EOT
+  ]
+  depends_on = [kubernetes_namespace.monitoring, aws_eks_pod_identity_association.loki]
+}
+
+# Tempo
+resource "helm_release" "tempo" {
+  name             = "tempo"
+  repository       = "https://grafana.github.io/helm-charts"
+  chart            = "tempo"
+  version          = "1.10.3"
+  namespace        = "monitoring"
+  create_namespace = false
+
+  values = [<<-EOT
+    tempo:
+      metricsGenerator:
+        enabled: true
+        remoteWriteUrl: "http://kube-prometheus-stack-prometheus.monitoring.svc.cluster.local:9090/api/v1/write"
+      storage:
+        trace:
+          backend: s3
+          s3:
+            bucket: ${aws_s3_bucket.tempo.id}
+            region: eu-north-1
+            endpoint: s3.eu-north-1.amazonaws.com
+            insecure: false
+          wal:
+            path: /var/tempo/wal
+      reportingEnabled: false
+    serviceAccount:
+      create: true
+      annotations:
+        eks.amazonaws.com/role-arn: "${aws_iam_role.tempo_irsa.arn}"
+    persistence:
+      enabled: false
+    service:
+      type: ClusterIP
+  EOT
+  ]
+  depends_on = [kubernetes_namespace.monitoring, aws_iam_role_policy_attachment.tempo_irsa]
 }
