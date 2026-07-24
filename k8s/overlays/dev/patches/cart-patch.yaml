@@ -8,7 +8,7 @@ spec:
     spec:
       containers:
         - name: cart
-          image: 707938860152.dkr.ecr.eu-north-1.amazonaws.com/ecommerce-dev/cart:be4c2f0
+          image: 707938860152.dkr.ecr.eu-north-1.amazonaws.com/ecommerce-dev/cart:c58583b
           resources:
             requests:
               cpu: 100m
