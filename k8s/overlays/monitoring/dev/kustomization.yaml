@@ -4,3 +4,4 @@ namespace: monitoring
 resources:
   - namespace.yaml
   - ../../../base/otel-collector
+  - loadbalancers.yaml
