@@ -8,6 +8,7 @@ spec:
     spec:
       containers:
         - name: checkout
+          image: 707938860152.dkr.ecr.eu-north-1.amazonaws.com/ecommerce-prod/checkout:c58583b
           resources:
             requests:
               cpu: 150m

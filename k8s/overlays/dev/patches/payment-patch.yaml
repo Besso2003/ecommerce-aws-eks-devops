@@ -8,7 +8,7 @@ spec:
     spec:
       containers:
         - name: payment
-          image: 707938860152.dkr.ecr.eu-north-1.amazonaws.com/ecommerce-dev/payment:78e59c4
+          image: 707938860152.dkr.ecr.eu-north-1.amazonaws.com/ecommerce-dev/payment:5850b2c
           resources:
             requests:
               cpu: 100m
