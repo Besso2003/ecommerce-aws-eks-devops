@@ -155,6 +155,22 @@ resource "helm_release" "grafana" {
             jsonData:
               serviceMap:
                 datasourceUid: prometheus-dev
+          - name: Prometheus (prod)
+            type: prometheus
+            uid: prometheus-prod
+            url: http://internal-aa416b9104da1454c86944703627414c-1583415304.eu-north-1.elb.amazonaws.com:9090
+            access: proxy
+          - name: Loki (prod)
+            type: loki
+            url: http://internal-a7e98722fd3534694af0639f33849a03-1292187256.eu-north-1.elb.amazonaws.com:3100
+            access: proxy
+          - name: Tempo (prod)
+            type: tempo
+            url: http://internal-ac8fb08a0163b4f17be5d0f397908cc1-833219178.eu-north-1.elb.amazonaws.com:3100
+            access: proxy
+            jsonData:
+              serviceMap:
+                datasourceUid: prometheus-prod
     dashboardProviders:
       dashboardproviders.yaml:
         apiVersion: 1
