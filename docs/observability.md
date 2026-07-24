@@ -69,7 +69,7 @@ Prometheus  Loki   Tempo            Prometheus  Loki   Tempo
 
 ### Grafana datasources — all 6 green
 
-![All six datasources confirmed healthy](../../docs/images/grafana-datasources-all-green.png)
+![All six datasources confirmed healthy](../docs/images/grafana-datasources-all-green.png)
 
 All six datasources (Prometheus, Loki, Tempo for both dev and prod) connected via private VPC peering — zero public endpoints.
 
