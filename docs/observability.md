@@ -75,25 +75,25 @@ All six datasources (Prometheus, Loki, Tempo for both dev and prod) connected vi
 
 ### Kubernetes cluster metrics dashboard
 
-![Kubernetes cluster overview dashboard](../../docs/images/grafana-kubernetes-dashboard.png)
+![Kubernetes cluster overview dashboard](../docs/images/grafana-kubernetes-dashboard.png)
 
 Pre-loaded Kubernetes cluster overview dashboard showing real-time CPU, memory, network, and pod metrics from the dev cluster.
 
 ### Service Graph — live dependency map
 
-![Service graph showing microservice dependencies](../../docs/images/grafana-service-graph.png)
+![Service graph showing microservice dependencies](../docs/images/grafana-service-graph.png)
 
 Auto-generated service dependency map derived purely from distributed traces — no manual configuration. Shows real-time request rates and response times between services (user → frontend → checkout → cart/payment/shipping/currency → kafka).
 
 ### Distributed trace waterfall
 
-![Distributed trace waterfall across multiple services](../../docs/images/grafana-trace-waterfall.png)
+![Distributed trace waterfall across multiple services](../docs/images/grafana-trace-waterfall.png)
 
 A complete request trace showing the full journey across multiple services with per-span timing. Generated from real traffic produced by the load-generator service.
 
 ### Logs in Loki
 
-![Loki logs query showing service logs](../../docs/images/grafana-loki-logs.png)
+![Loki logs query showing service logs](../docs/images/grafana-loki-logs.png)
 
 Pod logs from the dev cluster queryable by service: `{job="opentelemetry-demo/cart"}` shows cart service logs in real time.
 
